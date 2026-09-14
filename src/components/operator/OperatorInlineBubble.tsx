@@ -22,6 +22,7 @@ export function OperatorInlineBubble({
 }) {
   const { run, artifacts, messages } = useOperatorRun(runId);
   const [open, setOpen] = useState(false);
+  const [stepsOpen, setStepsOpen] = useState(false);
 
   if (!run) return null;
   const isRunning = run.status === "running" || run.status === "pending";
@@ -68,6 +69,10 @@ export function OperatorInlineBubble({
   const files = artifacts.filter((a) => a.kind !== "image");
   const hasPreview = !!run.published_url || !!run.project_id;
   const visibleMessages = messages.filter((m) => m.agent !== "system" && m.content?.trim());
+  const latest = visibleMessages[visibleMessages.length - 1];
+  const finalMessage = isRunning ? null : latest;
+  const steps = isRunning ? visibleMessages : visibleMessages.slice(0, -1);
+  const waitingExternal = run.current_phase === "waiting_external";
 
   return (
     <>
