@@ -84,8 +84,54 @@ export function createComputerTask(input: {
   });
 }
 
-export function pollComputerTask(taskId: string) {
-  return call<{ task: ComputerTask; events: ComputerEvent[] }>({ action: "poll", task_id: taskId });
+/**
+ * Polls a task and — when the provider reports a terminal state — writes that
+ * state back onto the `computer_tasks` row.
+ *
+ * The poll response is transient: the deployed function reads the provider live
+ * but leaves the row on `running`, so a task that really finished stayed
+ * "running" forever in the database. Anything that reads the row instead of
+ * polling (reopened conversations, usage, background continuation) then saw a
+ * task that never ends. Persisting here keeps the row authoritative and can
+ * only ever move a task forward: `done`/`failed` are written once, never back.
+ */
+export async function pollComputerTask(taskId: string) {
+  const res = await call<{ task: ComputerTask; events: ComputerEvent[] }>({
+    action: "poll",
+    task_id: taskId,
+  });
+  void persistTerminalState(res.task);
+  return res;
+}
+
+const persisted = new Set<string>();
+
+async function persistTerminalState(task: ComputerTask | null | undefined) {
+  if (!task?.id) return;
+  const terminal = task.status === "done" || task.status === "failed";
+  if (!terminal || persisted.has(task.id)) return;
+  persisted.add(task.id);
+  try {
+    const { data } = await supabase
+      .from("computer_tasks")
+      .select("status")
+      .eq("id", task.id)
+      .maybeSingle();
+    const current = (data as { status?: string } | null)?.status;
+    if (!current || current === "done" || current === "failed") return;
+    await supabase
+      .from("computer_tasks")
+      .update({
+        status: task.status,
+        result_text: task.result_text ?? null,
+        error: task.error ?? null,
+        progress: task.progress ?? null,
+      })
+      .eq("id", task.id);
+  } catch {
+    // Best-effort bookkeeping: the live poll already drives the UI.
+    persisted.delete(task.id);
+  }
 }
 
 export function stopComputerTask(taskId: string) {
