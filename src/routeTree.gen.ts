@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as ApiAnythingRouteImport } from './routes/api/anything'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
@@ -25,6 +26,11 @@ import { Route as ApiRenderPdfRouteImport } from './routes/api/render-pdf'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiWebSearchRouteImport } from './routes/api/web-search'
 
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SplatRoute = SplatRouteImport.update({
   id: '/$',
   path: '/$',
@@ -102,6 +108,7 @@ const ApiWebSearchRoute = ApiWebSearchRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/api/anything': typeof ApiAnythingRoute
   '/api/chat': typeof ApiChatRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/api/web-search': typeof ApiWebSearchRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/api/anything': typeof ApiAnythingRoute
   '/api/chat': typeof ApiChatRoute
@@ -137,6 +145,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/api/anything': typeof ApiAnythingRoute
   '/api/chat': typeof ApiChatRoute
@@ -156,6 +165,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/$'
     | '/api/anything'
     | '/api/chat'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
     | '/api/web-search'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/$'
     | '/api/anything'
     | '/api/chat'
@@ -190,6 +201,7 @@ export interface FileRouteTypes {
     | '/api/web-search'
   id:
     | '__root__'
+    | '/'
     | '/$'
     | '/api/anything'
     | '/api/chat'
@@ -208,6 +220,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
   ApiAnythingRoute: typeof ApiAnythingRoute
   ApiChatRoute: typeof ApiChatRoute
@@ -227,6 +240,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/$': {
       id: '/$'
       path: '/$'
@@ -336,6 +356,7 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
   ApiAnythingRoute: ApiAnythingRoute,
   ApiChatRoute: ApiChatRoute,
