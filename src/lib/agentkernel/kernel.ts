@@ -442,6 +442,7 @@ export async function softStop(runId: string): Promise<RunRow | null> {
 
 export async function stop(runId: string): Promise<RunRow | null> {
   fileCache.delete(runId);
+  forgetExternalTasks(runId);
   await event(runId, "step", "المهمة أُوقفت");
   return patch(runId, { status: "canceled", phase: "stopped", status_text: "أوقفتها" });
 }
@@ -858,12 +859,14 @@ async function finish(
   });
 
   fileCache.delete(runId);
+  forgetExternalTasks(runId);
   return updated;
 }
 
 async function fail(runId: string, message: string): Promise<RunRow | null> {
   await event(runId, "error", "المهمة وقفت", message);
   fileCache.delete(runId);
+  forgetExternalTasks(runId);
   return patch(runId, {
     status: "error",
     phase: "failed",
