@@ -105,9 +105,9 @@ export function OperatorInlineBubble({
             <div className="space-y-2">
               {isRunning ? (
                 <div className="text-[13px] text-muted-foreground line-clamp-2">
-                  {run.current_phase === "waiting_external"
-                    ? run.status_text || "Waiting for the computer to finish…"
-                    : run.status_text || latest?.content || "Working…"}
+                  {waitingExternal
+                    ? "Waiting for the computer to finish…"
+                    : latest?.content || "Working…"}
                 </div>
               ) : (
                 finalMessage && <ChatMessage role="assistant" content={finalMessage.content} />
