@@ -11,6 +11,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { LongRun } from "@/lib/longrun/types";
 import { loginIdentityFor } from "./credentials";
+import { forgetExternalTasks, pendingExternalWork } from "./externalWork";
 import { listMail } from "@/lib/mail/mailClient";
 import { askJson, askModel } from "./llm";
 import { CATALOG_SIZE, catalogCategories } from "@/lib/agentTools/catalog";
