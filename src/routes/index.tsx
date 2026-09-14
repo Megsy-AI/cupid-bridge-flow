@@ -1,24 +1,70 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Suspense, lazy, useEffect, useState } from "react";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
+// The home page is the Megsy SPA itself (same mount as the catch-all `$` route).
+// Dynamic imports keep every app module out of the SSR module graph.
+function loadChunk<T>(load: () => Promise<T>): Promise<T> {
+  return load().catch(async (err) => {
+    await new Promise((r) => setTimeout(r, 400));
+    try {
+      return await load();
+    } catch {
+      if (typeof window !== "undefined" && !sessionStorage.getItem("chunk-reloaded")) {
+        sessionStorage.setItem("chunk-reloaded", "1");
+        window.location.reload();
+      }
+      throw err;
+    }
+  });
+}
+
+const SpaApp = lazy(() => loadChunk(() => import("@/lib/SpaApp")));
+
 export const Route = createFileRoute("/")({
-  component: Index,
+  ssr: false,
+  component: SpaMount,
+  head: () => ({
+    meta: [
+      { title: "Megsy AI — Chat, agents and computer use in one workspace" },
+      {
+        name: "description",
+        content:
+          "Megsy AI runs real work for you: chat, deep research, images, video, slides, code and a cloud computer agent — in English and Egyptian Arabic.",
+      },
+      { property: "og:title", content: "Megsy AI — your AI workspace" },
+      {
+        property: "og:description",
+        content:
+          "Chat, deep research, images, video, slides, code and a cloud computer agent that actually finishes the task.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Megsy AI — your AI workspace" },
+      {
+        name: "twitter:description",
+        content:
+          "Chat, deep research, images, video, slides, code and a cloud computer agent that actually finishes the task.",
+      },
+    ],
+  }),
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function SpaMount() {
+  const [booted, setBooted] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    void loadChunk(() => import("@/lib/spaBoot")).then(() => {
+      if (!cancelled) setBooted(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!booted) return null;
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <Suspense fallback={null}>
+      <SpaApp />
+    </Suspense>
   );
 }

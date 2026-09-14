@@ -24,6 +24,9 @@ html, body { background-color: #1c1c1c; margin: 0; }
 }
 @keyframes boot-pulse { 0%,100% { opacity: 0.35; } 50% { opacity: 0.85; } }
 @media (prefers-reduced-motion: reduce) { #boot-mark { animation: none; } }
+/* The boot word must disappear the moment real page content exists, otherwise
+   it stays pulsing over every screen for the whole session. */
+#root.app-booted #boot-mark { display: none; }
 `;
 
 const GARAMOND_STYLE = `
@@ -353,5 +356,13 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 function RootComponent() {
+  // Once React is mounted the boot word has done its job; leaving it in place
+  // kept a pulsing "MEGSY" centred over every page for the entire session.
+  useEffect(() => {
+    document.getElementById("root")?.classList.add("app-booted");
+    return () => {
+      document.getElementById("root")?.classList.remove("app-booted");
+    };
+  }, []);
   return <Outlet />;
 }

@@ -8,7 +8,10 @@
 @import "./about-hero.css";
 @import "./settings-amber.css";
 
-@tailwind utilities;
+/* NOTE: never re-add "@tailwind utilities" here. This file is loaded after
+   index.css, and the v3 directive emits an UNLAYERED copy of every utility,
+   which outranks the layered responsive variants (e.g. `hidden md:flex`) and
+   silently hides the whole desktop layout. Utilities come from index.css. */
 
 /* ===========================================================
    Deep Research Report — Editorial Renderer (NYT / Medium style)
