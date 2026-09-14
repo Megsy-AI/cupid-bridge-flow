@@ -125,7 +125,6 @@ async function persistTerminalState(task: ComputerTask | null | undefined) {
         status: task.status,
         result_text: task.result_text ?? null,
         error: task.error ?? null,
-        progress: task.progress ?? null,
       })
       .eq("id", task.id);
   } catch {
