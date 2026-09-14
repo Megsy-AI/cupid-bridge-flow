@@ -268,10 +268,7 @@ export async function runCatalogTool(
         result = await httpCall(tool.base, args, key);
       }
     } else if (tool.kind === "browser") {
-      result = {
-        ok: true,
-        output: `BROWSER_STEP: open ${tool.base || String(args.url ?? tool.serviceName)} and perform "${tool.op}". Use login_identity for any sign-in and check_mail for verification codes.`,
-      };
+      result = await browserCall(tool, args, opts);
     } else {
       result = await dataCall(tool.service, tool.op, args, opts);
     }
