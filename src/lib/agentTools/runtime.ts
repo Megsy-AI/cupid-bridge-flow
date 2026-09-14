@@ -26,6 +26,8 @@ import {
   type ToolContext,
   type ToolResult,
 } from "@/lib/agentkernel/tools";
+import { awaitExternalTask, registerExternalTask } from "@/lib/agentkernel/externalWork";
+import { createComputerTask } from "@/lib/computer/client";
 import { getCatalogTool, renderTools, searchCatalog, CATALOG_SIZE } from "./catalog";
 
 export interface RunToolOptions {
@@ -309,6 +311,66 @@ export async function runCatalogTool(
   return result;
 }
 
+
+/**
+ * `browser` kind: real execution on the cloud computer.
+ *
+ * This used to return `ok: true` with a "BROWSER_STEP: …" instruction while
+ * nothing at all was executed, which is how a run could report success for work
+ * that never happened. The step is now handed to the computer agent and this
+ * call does not return until the external environment reaches a terminal state.
+ */
+async function browserCall(
+  tool: { id: string; op: string; base?: string; serviceName?: string },
+  args: Record<string, any>,
+  opts: RunToolOptions,
+): Promise<ToolResult> {
+  const target = String(args.url ?? tool.base ?? tool.serviceName ?? "").trim();
+  const instruction = String(args.instruction ?? args.task ?? args.query ?? "").trim();
+  const prompt = [
+    instruction || `Perform "${tool.op}"${target ? ` on ${target}` : ""}.`,
+    target && !instruction ? `Start at ${target}.` : "",
+    "Use the saved sign-in identity when a login is required, and check mail for verification codes.",
+    "Report exactly what you did and the concrete result.",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  try {
+    const created = await createComputerTask({ prompt });
+    if (!created?.task_id) {
+      return {
+        ok: false,
+        output: `The cloud computer did not start this step (${created?.error || created?.message || "unknown reason"}). Try another route to the same outcome.`,
+      };
+    }
+    registerExternalTask(opts.runId, created.task_id);
+    const task = await awaitExternalTask(created.task_id);
+    if (!task || (task.status !== "done" && task.status !== "failed")) {
+      return {
+        ok: false,
+        output: `The cloud computer is still running this step (task ${created.task_id}) and has not reported a result yet. Do not treat it as finished.`,
+      };
+    }
+    if (task.status === "failed") {
+      return {
+        ok: false,
+        output: `The cloud computer could not complete "${tool.op}": ${task.error || "no reason reported"}.`,
+      };
+    }
+    return {
+      ok: true,
+      output: clip(task.result_text || `Completed "${tool.op}" on the cloud computer.`),
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      output: `The cloud computer step failed to run: ${
+        error instanceof Error ? error.message : "unknown error"
+      }.`,
+    };
+  }
+}
 
 /** `tool_search` implementation: plain-language need -> shortlist of tool ids. */
 export function searchToolsFor(need: string, limit = 12): ToolResult {
