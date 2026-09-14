@@ -22,6 +22,7 @@ export function OperatorInlineBubble({
 }) {
   const { run, artifacts, messages } = useOperatorRun(runId);
   const [open, setOpen] = useState(false);
+  const [stepsOpen, setStepsOpen] = useState(false);
 
   if (!run) return null;
   const isRunning = run.status === "running" || run.status === "pending";
@@ -68,6 +69,10 @@ export function OperatorInlineBubble({
   const files = artifacts.filter((a) => a.kind !== "image");
   const hasPreview = !!run.published_url || !!run.project_id;
   const visibleMessages = messages.filter((m) => m.agent !== "system" && m.content?.trim());
+  const latest = visibleMessages[visibleMessages.length - 1];
+  const finalMessage = isRunning ? null : latest;
+  const steps = isRunning ? visibleMessages : visibleMessages.slice(0, -1);
+  const waitingExternal = run.current_phase === "waiting_external";
 
   return (
     <>
@@ -93,29 +98,51 @@ export function OperatorInlineBubble({
             ) : null}
           </div>
 
+          {/* Execution events are NOT conversation. While the run is live only
+              the current status shows; earlier steps stay in a collapsed list.
+              The final report is the only thing rendered as a real reply. */}
           {visibleMessages.length > 0 ? (
-            <div className="space-y-3">
-              {visibleMessages.map((m) => {
-                const key =
-                  (m.agent as AgentKey) in AGENT_COLORS ? (m.agent as AgentKey) : "assistant";
-                const ac = AGENT_COLORS[key];
-                const active =
-                  isRunning &&
-                  key === agentKey &&
-                  m.id === visibleMessages[visibleMessages.length - 1]?.id;
-                return (
-                  <div key={m.id} className={active ? "opacity-100" : "opacity-70"}>
-                    <div
-                      className="flex items-center gap-1.5 text-[11px] font-semibold mb-1"
-                      style={{ color: ac.color }}
-                    >
-                      <AgentStar agent={key} size={13} active={active} />
-                      <span>{ac.label}</span>
+            <div className="space-y-2">
+              {isRunning ? (
+                <div className="text-[13px] text-muted-foreground line-clamp-2">
+                  {waitingExternal
+                    ? "Waiting for the computer to finish…"
+                    : latest?.content || "Working…"}
+                </div>
+              ) : (
+                finalMessage && <ChatMessage role="assistant" content={finalMessage.content} />
+              )}
+
+              {steps.length > 0 && (
+                <div>
+                  <button
+                    onClick={() => setStepsOpen((v) => !v)}
+                    className="text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {stepsOpen ? "Hide steps" : `Steps (${steps.length})`}
+                  </button>
+                  {stepsOpen && (
+                    <div className="mt-2 space-y-2 border-s border-border/60 ps-3">
+                      {steps.map((m) => {
+                        const key =
+                          (m.agent as AgentKey) in AGENT_COLORS
+                            ? (m.agent as AgentKey)
+                            : "assistant";
+                        const ac = AGENT_COLORS[key];
+                        return (
+                          <div key={m.id} className="text-[12px] text-muted-foreground">
+                            <span className="font-semibold" style={{ color: ac.color }}>
+                              {ac.label}
+                            </span>
+                            <span className="mx-1">·</span>
+                            <span className="whitespace-pre-wrap">{m.content}</span>
+                          </div>
+                        );
+                      })}
                     </div>
-                    <ChatMessage role="assistant" content={m.content} />
-                  </div>
-                );
-              })}
+                  )}
+                </div>
+              )}
             </div>
           ) : (
             <div className="prose-chat text-foreground whitespace-pre-wrap">{run.goal}</div>

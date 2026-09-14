@@ -11,6 +11,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { LongRun } from "@/lib/longrun/types";
 import { loginIdentityFor } from "./credentials";
+import { forgetExternalTasks, pendingExternalWork } from "./externalWork";
 import { listMail } from "@/lib/mail/mailClient";
 import { askJson, askModel } from "./llm";
 import { CATALOG_SIZE, catalogCategories } from "@/lib/agentTools/catalog";
@@ -441,6 +442,7 @@ export async function softStop(runId: string): Promise<RunRow | null> {
 
 export async function stop(runId: string): Promise<RunRow | null> {
   fileCache.delete(runId);
+  forgetExternalTasks(runId);
   await event(runId, "step", "المهمة أُوقفت");
   return patch(runId, { status: "canceled", phase: "stopped", status_text: "أوقفتها" });
 }
@@ -767,7 +769,26 @@ async function finish(
   ctx: ToolContext,
 ): Promise<RunRow | null> {
   const round = (run.review_round ?? 0) + 1;
+
+  // Authoritative gate: while a real external environment is still executing
+  // work for this run, the run is NOT finished — no matter what the model says.
+  const pending = await pendingExternalWork(runId);
+  if (pending.length) {
+    const detail = pending[0]?.progress || "";
+    await event(runId, "step", "لسه الكمبيوتر شغّال — مش هأقفل المهمة", detail);
+    return patch(runId, {
+      status: "running",
+      phase: "waiting_external",
+      status_text: "مستني الكمبيوتر يخلّص التنفيذ",
+      result: {
+        ...(run.result ?? {}),
+        external_pending: pending.map((p) => p.taskId),
+      },
+    });
+  }
+
   await event(runId, "step", "دلوقتي بأراجع اللي عملته");
+
 
   const transcript: string[] = Array.isArray(run.result?.transcript) ? run.result.transcript : [];
   const verdict = await askJson<{ done?: boolean; gap?: string }>(CRITIQUE_SYSTEM, [
@@ -782,11 +803,13 @@ async function finish(
     },
   ]);
 
-  // The supervisor gets the last word: a premature finish is sent back to work,
-  // and even a good finish gets one mandatory review pass ordered by the manager.
-  const supervisor = round <= MAX_REVIEW_ROUNDS ? await superviseRun(run) : null;
+  // The supervisor is only consulted when the self-review already found a gap.
+  // Verification now comes from real external state, not from an extra model
+  // round trip, so a clean review no longer pays for a mandatory review pass.
+  const supervisor =
+    verdict?.done === false && round <= MAX_REVIEW_ROUNDS ? await superviseRun(run) : null;
   const supervisorBlocks = supervisor?.keep_going === true && !!supervisor.directive;
-  const needsReviewPass = round === 1 && verdict?.done !== false && !supervisorBlocks;
+  const needsReviewPass = false;
 
   if ((verdict?.done === false || supervisorBlocks || needsReviewPass) && round <= MAX_REVIEW_ROUNDS) {
     const gap = needsReviewPass
@@ -836,12 +859,14 @@ async function finish(
   });
 
   fileCache.delete(runId);
+  forgetExternalTasks(runId);
   return updated;
 }
 
 async function fail(runId: string, message: string): Promise<RunRow | null> {
   await event(runId, "error", "المهمة وقفت", message);
   fileCache.delete(runId);
+  forgetExternalTasks(runId);
   return patch(runId, {
     status: "error",
     phase: "failed",
