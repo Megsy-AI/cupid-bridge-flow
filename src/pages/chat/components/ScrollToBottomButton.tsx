@@ -31,11 +31,11 @@ const ScrollToBottomButtonImpl = ({
       onClick={onClick}
       aria-label={aria}
       title={aria}
-      className="sticky bottom-4 z-30 mx-auto flex h-10 w-fit min-w-10 items-center justify-center gap-1.5 rounded-full border border-border/60 bg-popover/90 px-3 text-popover-foreground shadow-lg backdrop-blur-xl transition-colors hover:bg-accent hover:text-accent-foreground motion-safe:animate-in motion-safe:fade-in-0"
+      className="sticky bottom-3 z-30 mx-auto flex h-9 w-fit items-center justify-center gap-1.5 rounded-full border-0 bg-transparent px-2 text-muted-foreground/70 shadow-none transition-colors hover:text-foreground"
     >
-      <ArrowDown className="h-4 w-4" strokeWidth={2} />
+      <ArrowDown className="h-[15px] w-[15px]" strokeWidth={1.75} />
       {newMessagesCount > 0 && (
-        <span className="text-[12.5px] font-semibold tabular-nums">{newMessagesCount}</span>
+        <span className="text-[12.5px] font-medium tabular-nums">{newMessagesCount}</span>
       )}
     </button>
   );
