@@ -1,39 +1,19 @@
 import { memo, useEffect, useMemo, useState } from "react";
 import { m as motion, AnimatePresence } from "framer-motion";
 import {
-  Camera,
   Image,
-  FileUp,
-  Link2,
   Globe,
-  Lightbulb,
-  Wrench,
   Music2,
-  Timer,
   ChevronLeft,
   Check,
   Plus,
   Loader2,
   Play,
   Trash2,
-  Image as ImageIcon,
-  Video as VideoIcon,
-  Microscope,
-  Presentation,
-  FileText,
   Plug,
-  Code2,
-  ListChecks,
-  Puzzle,
-  ImagePlus,
-  Smartphone,
-  ScanSearch,
-  Bot,
-  Aperture,
   Images,
   Paperclip,
   Blocks,
-  Radar,
 
 } from "lucide-react";
 
@@ -42,9 +22,6 @@ import { useWebSearchMode, WEB_SEARCH_MODES } from "@/lib/webSearchMode";
 
 import { promptUpgrade } from "@/lib/upgradeMoment";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  DesktopRow,
-} from "@/components/chat/PlusMenuRows";
 import type { Integration } from "@/lib/integrationsData";
 import { IOS_SPRING as iosSpring } from "../constants/motion";
 import { glassModelMenu } from "@/components/model-picker/glassModelMenuStyles";
@@ -122,23 +99,6 @@ const fadeProps = (x: number) => ({
 
 const mobileFont = "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif";
 
-const DesktopGroup = ({ title, children }: { title?: string; children: React.ReactNode }) => (
-  <div className="flex flex-col">
-    {title && (
-      <div className="px-2.5 pb-1 text-[10.5px] font-semibold uppercase tracking-wider text-foreground/65">
-        {title}
-      </div>
-    )}
-    <div className="flex flex-col">{children}</div>
-  </div>
-);
-
-/**
- * The "+" menu, ChatGPT-style: one flat list of plain rows — icon, label, and
- * (only where it carries state) a trailing value. No tiles, no two-line
- * descriptions, no second layout for desktop; the same list renders everywhere
- * so the menu reads identically on a phone and on a laptop.
- */
 const PlusMain = (p: PlusContentProps) => {
   const language = useUserLang();
   const isArabic = language === "ar-eg";
