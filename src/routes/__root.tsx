@@ -393,6 +393,7 @@ function RootShell({ children }: { children: ReactNode }) {
         </div>
         <script dangerouslySetInnerHTML={{ __html: SNAPSHOT_RESTORE_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: SPECULATION_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: ADROLL_SCRIPT }} />
         <Scripts />
       </body>
     </html>
