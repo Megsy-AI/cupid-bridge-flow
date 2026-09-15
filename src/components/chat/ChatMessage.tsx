@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import ThinkingLoader from "./ThinkingLoader";
 import { type ParallelAgentTask } from "./ParallelAgentsPanel";
 import { detectLang, langDir } from "@/lib/detectLang";
+import { useUserLang } from "@/lib/authI18n";
 import { parseLearnSegments, hasLearnCards } from "@/lib/learnCardParser";
 import { parseConnectSegments, hasConnectCards } from "@/lib/chat/connectCardParser";
 import { useSmoothText } from "@/hooks/useSmoothText";
@@ -867,49 +868,13 @@ const ChatMessage = ({
   const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userBubbleRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
-  const swipeStartRef = useRef<{ x: number; y: number; t: number } | null>(null);
-  const [swipeHint, setSwipeHint] = useState<"regen" | "branch" | null>(null);
+  // Swipe gestures on the bubble were removed: a stray horizontal drag fired
+  // Regenerate/Branch and looked like content loss. The same actions now live
+  // as explicit buttons in the message action row below.
+  const uiLang = useUserLang();
+  const arUi = uiLang === "ar-eg";
+  const label = (en: string, ar: string) => (arUi ? ar : en);
 
-  // Swipe gestures on the assistant bubble are DISABLED on purpose: a stray
-  // horizontal drag (e.g. trying to open the sidebar) used to fire Regenerate
-  // or Branch, which truncated the conversation and looked like content loss.
-  const swipeEnabled = false as boolean;
-  const handleTouchStart = swipeEnabled
-    ? (e: React.TouchEvent) => {
-        const t = e.touches[0];
-        swipeStartRef.current = { x: t.clientX, y: t.clientY, t: Date.now() };
-      }
-    : undefined;
-  const handleTouchEnd = swipeEnabled
-    ? (e: React.TouchEvent) => {
-        const start = swipeStartRef.current;
-        swipeStartRef.current = null;
-        setSwipeHint(null);
-        if (!start) return;
-        const t = e.changedTouches[0];
-        const dx = t.clientX - start.x;
-        const dy = t.clientY - start.y;
-        const dt = Date.now() - start.t;
-        if (dt > 600) return;
-        if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 2) return;
-        if (dx < 0 && onRegenerate) onRegenerate();
-        else if (dx > 0 && onBranch) onBranch();
-      }
-    : undefined;
-  const handleTouchMove = swipeEnabled
-    ? (e: React.TouchEvent) => {
-        const start = swipeStartRef.current;
-        if (!start) return;
-        const t = e.touches[0];
-        const dx = t.clientX - start.x;
-        const dy = t.clientY - start.y;
-        if (Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy) * 2) {
-          setSwipeHint(dx < 0 ? "regen" : "branch");
-        } else {
-          setSwipeHint(null);
-        }
-      }
-    : undefined;
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(content);
