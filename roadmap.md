@@ -21,6 +21,17 @@
   (`src/lib/media/autoMediaIntent.ts`, `detectImageEditIntent`).
 - Cost: the mandatory reviewer round-trip was removed; the higher reviewer runs only when
   self-review finds a real gap.
+- Unstyled/broken first paint: every stylesheet was imported from `src/lib/spaBoot.ts`, a
+  client-only dynamic chunk, so the server HTML carried no stylesheet. All render-critical
+  CSS now lives in `src/styles/app.css`, imported by `src/routes/__root.tsx`, so it ships as
+  a `<link>` with the document. Import order preserved.
+- Dark flash before the light UI: the boot shell was hard-coded dark while the default theme
+  is light. `THEME_BOOT_SCRIPT` in `__root.tsx` resolves the stored theme before first paint
+  and `BOOT_STYLE` is theme-aware (auth screens stay dark).
+- Dead code: 60 unreachable modules deleted (unused shadcn primitives, `serviceRouter`,
+  `intentDetector`, `openManus`, `coderStackBlitz`, `persistentCache`, …), the leftover
+  template `src/styles.css` removed, and 26 unused npm packages dropped (antd, recharts,
+  `@lobehub/ui`, `@imgly/background-removal`, unused Radix packages, …).
 
 ## Open
 - React 19 warning "Cannot update a component while rendering a different component"
