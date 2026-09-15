@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { getCachedUser } from "@/lib/cachedUser";
 import { getActiveWorkspaceId } from "@/lib/activeWorkspace";
+import { getUserLang } from "@/lib/authI18n";
 import type { Location, NavigateFunction } from "react-router-dom";
 import { MEGSY_MODEL } from "../chatConstants";
 import type { Message } from "../chatConstants";
