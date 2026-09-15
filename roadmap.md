@@ -49,3 +49,4 @@
 - [done] ScrollToBottomButton restored (was `return null`); wired via ChatMessagesArea, sticky centered, count badge, ar/en aria.
 - [done] ChatMessage: removed dead swipe hint/handlers; added Regenerate + Branch actions; ar/en labels for More/Copy/Edit/Like/Dislike/Copied/Download/Resume/interrupted; logical `end-0`/`text-start`; menu `dir` follows UI lang; touch targets 28px -> 36px.
 - [done] AppSidebar: chat search input (shown when >5 conversations) filtering titles, with "No matches" state.
+- [done] Clean-design pass: scroll-to-bottom button and sidebar search are borderless/transparent with light 1.75-stroke icons; message "More" button lost its hover fill.
