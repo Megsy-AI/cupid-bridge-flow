@@ -41,26 +41,9 @@ const __firstVisitWelcome = (() => {
 })();
 
 import { installTapReliability } from "@/lib/tapReliability";
-import "../index.css";
-import "../styles/claude-chat.css";
-import "../styles/pwa-safe-area.css";
-import "../styles/pwa-responsive.css";
-import "../styles/font-fallback.css";
-import "../styles/view-transitions.css";
-import "../styles/megsy-tokens.css";
-// Load the complete dark-only theme before first paint. Deferred injection
-// caused a second full-page style pass and visible color flash.
-import "../styles/deferred.css";
-import "../styles/chat-legibility.css";
-// Must remain last: prevents legacy/page-level mobile styles from restoring
-// old button colours after the global sunset theme has loaded.
-import "../styles/mobile-sunset-buttons.css";
-// Light (white + pink) theme layer — must load after every legacy dark sheet.
-import "../styles/light-theme.css";
-// Device-tier layer — must load last so it can strip expensive decorative
-// effects (blur, infinite animations) on weak devices without any other sheet
-// re-adding them afterwards.
-import "../styles/perf-tier.css";
+// All render-critical CSS now loads from src/styles/app.css, imported by
+// src/routes/__root.tsx so the stylesheet ships with the HTML instead of
+// arriving with this dynamic chunk (which made pages paint unstyled).
 import { applyPerfTier } from "@/lib/deviceCapability";
 
 // Classify the device before React mounts so the first painted frame already

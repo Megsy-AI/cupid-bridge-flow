@@ -9,12 +9,21 @@ import {
 import type { QueryClient } from "@tanstack/react-query";
 import { useEffect, type ReactNode } from "react";
 
+import "../styles/app.css";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
+// First-paint colours must match the theme the app is about to render,
+// otherwise every cold load flashes a dark screen before the light UI arrives
+// and the page looks broken while loading. THEME_BOOT_SCRIPT resolves the
+// stored theme before paint; these rules follow it.
 const BOOT_STYLE = `
-:root { color-scheme: dark; }
-html, body { background-color: #1c1c1c; margin: 0; }
-#root { min-height: 100dvh; background-color: #1c1c1c; }
+:root { color-scheme: light; }
+html, body { background-color: #f3f3f5; margin: 0; }
+#root { min-height: 100dvh; background-color: #f3f3f5; }
+html[data-theme="dark"] { color-scheme: dark; }
+html[data-theme="dark"], html[data-theme="dark"] body { background-color: #1c1c1c; }
+html[data-theme="dark"] #root { background-color: #1c1c1c; }
+html[data-theme="light"] #boot-mark { color: rgba(0,0,0,0.32); }
 #root[data-snapshot-preview="true"] { pointer-events: none; user-select: none; contain: paint; }
 #boot-mark {
   position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
@@ -27,6 +36,22 @@ html, body { background-color: #1c1c1c; margin: 0; }
 /* The boot word must disappear the moment real page content exists, otherwise
    it stays pulsing over every screen for the whole session. */
 #root.app-booted #boot-mark { display: none; }
+`;
+
+const THEME_BOOT_SCRIPT = `
+(function(){try{
+  var p=location.pathname;
+  var auth=["/auth","/login","/signin","/sign-in","/signup","/sign-up","/register","/reset-password"]
+    .some(function(a){return p===a||p.indexOf(a+"/")===0;});
+  var m=localStorage.getItem("megsy_theme");
+  if(m!=="dark"&&m!=="light"&&m!=="system") m="light";
+  var t=auth?"dark":(m==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):m);
+  var h=document.documentElement;
+  h.setAttribute("data-theme",t);
+  h.classList.toggle("dark",t==="dark");
+  h.classList.toggle("light",t==="light");
+  h.style.colorScheme=t;
+}catch(e){}})();
 `;
 
 const GARAMOND_STYLE = `
@@ -315,6 +340,7 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en" dir="ltr" className="dark" translate="no">
       <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
         <style dangerouslySetInnerHTML={{ __html: BOOT_STYLE }} />
         <style dangerouslySetInnerHTML={{ __html: GARAMOND_STYLE }} />
         <script dangerouslySetInnerHTML={{ __html: TELEGRAM_SCRIPT }} />
