@@ -1,62 +1,30 @@
-# Roadmap
+# Megsy — roadmap
 
-## Import love-linker (Megsy AI) into this project
-- [x] Copy app source (src content, public, styles, configs) keeping the Lovable template shell
-- [x] Merge package.json dependencies and install
-- [x] Merge Tailwind config (v3 config via @config on Tailwind v4; dropped tailwindcss-rtl, v4 has logical props natively)
-- [x] Set Supabase env vars from source .env
-- [x] Wire fonts/index.html head tags into template root (src/routes/__root.tsx)
-- [x] Mount app client-side via splat route (src/routes/$.tsx + src/lib/SpaApp.tsx + src/lib/spaBoot.ts); build + preview verified
-- [x] Adapt /api/* serverless functions to TanStack server routes (src/routes/api/*, incl. /api/deep-research and /api/dev-admin aliases)
+## Fixed in the QA pass
+- Computer tasks: terminal state (done/failed + result text) is written only after the
+  external environment confirms it (`src/lib/computer/client.ts`, `persistTerminalState`).
+- Browser steps in the agent tool runtime really execute on the cloud computer instead of
+  returning a fake `BROWSER_STEP:` string (`src/lib/agentTools/runtime.ts`).
+- The agent cannot declare completion while external work is still running
+  (`src/lib/agentkernel/kernel.ts`).
+- Execution events are no longer chat messages: one status line while running, steps in a
+  collapsed list, only the final report as a message.
+- Stale `running` computer rows (>10 min) are reconciled once on load
+  (`src/lib/computer/taskIndicators.ts`).
+- Desktop blank screen: `src/styles/deferred.css` shipped `@tailwind utilities`, emitting an
+  unlayered copy of every utility that beat the responsive variants.
+- `/` rendered the template placeholder instead of the SPA (`src/routes/index.tsx`).
+- Code blocks vanished from answers: `stripLearnBlocks` had an optional fence flag
+  (`src/components/chat/ChatMessage.tsx`).
+- Image edit follow-ups ("now make the bicycle red") went to the text model and produced
+  nothing; they now route to the image pipeline with the previous image as reference
+  (`src/lib/media/autoMediaIntent.ts`, `detectImageEditIntent`).
+- Cost: the mandatory reviewer round-trip was removed; the higher reviewer runs only when
+  self-review finds a real gap.
 
-## Follow-up fixes
-- [x] Pricing page trial explanation — already present in imported code (pricing banner + onboarding trial slide)
-- [x] Onboarding slide 4 image — already present (welcome-trial-korean-editorial-v1.jpg)
-- [x] Snapshot capture on leave from first visit + clean #root before React mounts (spaBoot.ts)
-- [x] Typecheck (relaxed tsconfig mirroring source repo) + production build passes
-- [ ] Computer view on chat page — /api/computer-agent now wired (401 without auth, as expected); needs a signed-in test by the user to confirm end-to-end
-
-## Keys & onboarding (current)
-- [x] Read provider keys from DB tables (abliteration_keys + provider_api_keys) instead of env for chat & deep research
-- [ ] Replace onboarding slide 4 image and fix clipped text
-
-## Pre-publish review (full pass)
-- [x] Signed-in audit of /chat, /settings, /billing, /usage, /referrals, /notifications, /pricing, /auth (desktop + mobile, no horizontal overflow)
-- [x] Services verified live: chat, computer agent (browsing), image generation, research, website build, slides
-- [x] Fixed provider model routing: app model ids (e.g. kimi-k3) are mapped to valid upstream ids instead of failing with model_not_found (502)
-- [x] Fixed hard-coded Arabic labels in the computer task card (now follow interface language)
-- [x] Production build passes; all routes return 200 (no soft-404 deep-link issue like the old megsyai.com host)
-- [ ] Provider billing: the stored abliteration key reports insufficient credits for the direct /api/chat path (production chat goes through the Supabase function and works)
-
-- [ ] ربط الموقع بجدول service_keys (Cerebras نصوص / DeAPI + Renderful صور وفيديو / Browser Use الوكيل) بدل abliteration — المفاتيح مشفرة ومحتاجة مفتاح فك التشفير
-
-## نتيجة الاختبارات السبعة (12 سبتمبر)
-1. الأنواع + البناء: ناجح.
-2. كل المسارات ترجع 200 محليًا.
-3. أحجام الحزم: أكبر الملفات (elk / pptx / shiki) كلها lazy — مقبول.
-4. الهاتف + الكمبيوتر: لا يوجد أي تجاوز أفقي في كل الصفحات.
-5. الدخول بالحساب التجريبي: كل الصفحات المحمية تعمل.
-6. الدردشة تعمل عبر Cerebras. أُصلح نداء /api/chat المعطّل (502) في fastChat.
-7. فحص الأمان: أُصلح تسريب prompt، وتزوير الإحالات، والتلاعب بإحصاءات الزيارات.
-
-### مفتوح
-- النموذج أحيانًا يطبع "تفكيره" داخل الرد (سلوك المزود/الـ edge function وليس الواجهة).
-- Leaked password protection غير مفعّل في إعدادات Supabase Auth (يحتاج تفعيل يدوي).
-- تحذير React: setState أثناء render في Transitioner (غير مؤثر).
-
-## 12 سبتمبر (متابعة)
-- [x] إصلاح قفز الشات لأعلى وتجمّد التمرير أثناء البث (إلغاء التثبيت فور لمس/تمرير المستخدم)
-- [x] إعادة محاولة تحميل ملفات التطبيق بعد النشر (تفادي الشاشة الفارغة عند تغيّر الإصدار)
-
-## إعادة تشغيل الاختبارات السبعة (12 سبتمبر — مساءً)
-- [x] 1 الأنواع + بناء الإنتاج: ناجح.
-- [x] 2 كل الصفحات ترجع 200 (بما فيها /billing و /notifications ومسار غير موجود).
-- [x] 3 الأداء: أكبر الحزم (shiki / mermaid / elk / echarts) كلها lazy.
-- [x] 4 الهاتف 390 والكمبيوتر 1280: صفر تجاوز أفقي في كل الصفحات.
-- [x] 5 الواجهة/التصميم: لا أخطاء console غير تحذير Transitioner (تحذير تطوير فقط).
-- [x] 6 الباك اند: مفاتيح المزودين كلها من service_keys عبر edge functions.
-- [x] 7 فحص الأمان (Supabase linter): لا مشاكل ERROR. مفتوح: Leaked password protection يحتاج تفعيل يدوي، ودوال SECURITY DEFINER كثيرة قابلة للاستدعاء (مراجعة صلاحيات مستقبلية).
-
-## مهمة جديدة (16:22)
-- [ ] تسجيل الدخول بالحساب التجريبي وإرسال مهمة الفحص الشامل للوكيل داخل الموقع (megsyai.com) واستلام تقريره
-- [x] تأمين صلاحيات دوال قاعدة البيانات الحساسة (منح/خصم الرصيد، المفاتيح، الأسرار)
+## Open
+- React 19 warning "Cannot update a component while rendering a different component"
+  (Transitioner / nested BrowserRouter). Noisy only; the fix touches SPA boot.
+- On mobile, Enter inserts a newline instead of sending; only the Send button sends.
+- The Learning mode chip needs horizontal scrolling in the mobile mode bar to be reachable.
+- MCP / Integrations and Files were not exercised end to end in this pass.
