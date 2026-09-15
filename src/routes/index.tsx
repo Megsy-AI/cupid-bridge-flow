@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense, lazy, useEffect, useState } from "react";
+import { BootFailed } from "@/components/common/BootFailed";
 
 // The home page is the Megsy SPA itself (same mount as the catch-all `$` route).
 // Dynamic imports keep every app module out of the SSR module graph.
