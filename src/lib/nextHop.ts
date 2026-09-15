@@ -43,7 +43,7 @@ const NEXT_HOPS: Array<{ match: RegExp; hops: Loader[] }> = [
     match: /^\/settings\/?$/,
     hops: [
       () => import("@/pages/settings/DataControlsPage"),
-      () => import("@/pages/settings/UsagePage"),
+      () => import("@/pages/usage/UsagePage"),
       () => import("@/pages/marketing/PricingPage"),
     ],
   },
