@@ -166,6 +166,13 @@ const SNAPSHOT_RESTORE_SCRIPT = `(function () {
     layer.style.cssText = "position:fixed;inset:0;z-index:2147483000;overflow:hidden;background:var(--background,#0b0b0c)";
     layer.appendChild(tpl.content);
     document.body.appendChild(layer);
+    // Safety net: if the app never mounts (stale chunk, slow network, script
+    // error) this overlay would otherwise sit on screen forever and look like
+    // an endless load. Drop it after a short grace period no matter what.
+    setTimeout(function () {
+      var el = document.getElementById("snapshot-preview");
+      if (el) el.remove();
+    }, 4000);
   } catch (err) {}
 })();`;
 
