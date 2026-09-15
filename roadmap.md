@@ -42,3 +42,5 @@
 - MCP / Integrations and Files were not exercised end to end in this pass.
 - Chips (mode chips above the composer) look bad — restyle them properly.
 - No white screen / no loading screen: the site must appear instantly on first paint.
+
+- Integrate the AdRoll pixel/tag (adv U7L76NUFIBDU5JJZWFGSPY) site-wide.
