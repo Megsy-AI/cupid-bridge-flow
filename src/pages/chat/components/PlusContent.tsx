@@ -1,7 +1,6 @@
 import { memo, useEffect, useMemo, useState } from "react";
 import { m as motion, AnimatePresence } from "framer-motion";
 import {
-  Image,
   Globe,
   Music2,
   ChevronLeft,
