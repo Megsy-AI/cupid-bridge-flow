@@ -12,10 +12,8 @@ import { useEffect, type ReactNode } from "react";
 import "../styles/app.css";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
-// First-paint colours must match the theme the app is about to render,
-// otherwise every cold load flashes a dark screen before the light UI arrives
-// and the page looks broken while loading. THEME_BOOT_SCRIPT resolves the
-// stored theme before paint; these rules follow it.
+// First-paint colours match the stored theme. Do not render a fake app frame
+// here: on a slow or interrupted connection it looks like an endless loader.
 const BOOT_STYLE = `
 :root { color-scheme: light; }
 html, body { background-color: #f3f3f5; margin: 0; }
@@ -24,23 +22,6 @@ html[data-theme="dark"] { color-scheme: dark; }
 html[data-theme="dark"], html[data-theme="dark"] body { background-color: #1c1c1c; }
 html[data-theme="dark"] #root { background-color: #1c1c1c; }
 #root[data-snapshot-preview="true"] { pointer-events: none; user-select: none; contain: paint; }
-/* First paint is a still picture of the app's own frame — a top bar and the
-   composer in place — instead of a pulsing word or a spinner, so opening
-   Megsy never reads as "loading". It is static on purpose: nothing animates,
-   nothing says wait, and it is replaced the instant React commits. */
-#boot-mark {
-  position: fixed; inset: 0; pointer-events: none;
-  display: flex; flex-direction: column; justify-content: space-between;
-  padding: 14px 14px calc(18px + env(safe-area-inset-bottom));
-  --boot-ink: rgba(255,255,255,0.07);
-}
-html[data-theme="light"] #boot-mark { --boot-ink: rgba(0,0,0,0.055); }
-#boot-mark i { display: block; background: var(--boot-ink); border-radius: 999px; }
-#boot-mark .bm-top { display: flex; align-items: center; gap: 10px; }
-#boot-mark .bm-top i:first-child { width: 30px; height: 30px; border-radius: 10px; }
-#boot-mark .bm-top i:last-child { width: 92px; height: 12px; }
-#boot-mark .bm-bar { height: 52px; border-radius: 26px; }
-#root.app-booted #boot-mark { display: none; }
 `;
 
 const THEME_BOOT_SCRIPT = `
@@ -336,10 +317,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "dns-prefetch", href: "https://qdnqxjzjecaieuavagvq.supabase.co" },
       { rel: "preconnect", href: "https://d8j0ntlcm91z4.cloudfront.net", crossOrigin: "anonymous" },
       { rel: "dns-prefetch", href: "https://d8j0ntlcm91z4.cloudfront.net" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600;900&display=swap",
-      },
     ],
   }),
   shellComponent: RootShell,
@@ -422,13 +399,6 @@ function RootShell({ children }: { children: ReactNode }) {
           </defs>
         </svg>
         <div id="root">
-          <div id="boot-mark" aria-hidden="true">
-            <div className="bm-top">
-              <i />
-              <i />
-            </div>
-            <i className="bm-bar" />
-          </div>
           {children}
         </div>
         <script dangerouslySetInnerHTML={{ __html: SNAPSHOT_RESTORE_SCRIPT }} />
