@@ -59,6 +59,13 @@ export const DeferredRoutes = ({ children }: { children: React.ReactNode }) => {
   const isPending = deferredLocation !== location;
   useTrackInAppNavigation();
 
+  // Warm the screens reachable from this one, so the next tap has nothing to
+  // download. Runs per navigation and is a no-op on 2G / data-saver.
+  useEffect(() => {
+    prefetchNextHop(location.pathname);
+  }, [location.pathname]);
+
+
   useEffect(() => {
     const root = document.documentElement;
     if (isPending) root.setAttribute("data-nav-pending", "true");
