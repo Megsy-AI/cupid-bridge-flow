@@ -343,11 +343,50 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
   }),
   shellComponent: RootShell,
-
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
 });
+
+// AdRoll retargeting pixel. Loaded lazily after the app is interactive so the
+// third-party request never competes with the first paint, and re-fired on SPA
+// navigation because the loader only counts one pageView per document.
+const ADROLL_SCRIPT = `
+(function(){
+  var start = function(){
+    var w = window, d = document;
+    w.adroll_adv_id = "U7L76NUFIBDU5JJZWFGSPY";
+    w.adroll_pix_id = "YH6HQKQYMVBAFP6KK4M5WU";
+    w.adroll_version = "2.0";
+    w.adroll_tag_source = w.adroll_tag_source || "manual";
+    w.__adroll_loaded = true;
+    w.adroll = w.adroll || [];
+    w.adroll.f = ['setProperties','identify','track','identify_email','get_cookie'];
+    for (var a = 0; a < w.adroll.f.length; a++) {
+      w.adroll[w.adroll.f[a]] = w.adroll[w.adroll.f[a]] || (function(n){
+        return function(){ w.adroll.push([n, arguments]); };
+      })(w.adroll.f[a]);
+    }
+    var e = d.createElement('script');
+    var o = d.getElementsByTagName('script')[0];
+    e.async = 1;
+    e.src = "https://s.adroll.com/j/" + w.adroll_adv_id + "/roundtrip.js";
+    o.parentNode.insertBefore(e, o);
+    w.adroll.track("pageView");
+    var last = location.pathname;
+    var onNav = function(){
+      if (location.pathname === last) return;
+      last = location.pathname;
+      try { w.adroll.track("pageView"); } catch (err) {}
+    };
+    w.addEventListener("megsy:navigation", onNav);
+    w.addEventListener("popstate", onNav);
+  };
+  if (window.requestIdleCallback) requestIdleCallback(start, { timeout: 4000 });
+  else setTimeout(start, 2500);
+})();
+`;
+
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
