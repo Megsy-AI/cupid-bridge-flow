@@ -2,6 +2,7 @@
 // Emits typed events the UI can render as: todo list, files, bash logs, text.
 import { supabase } from "@/integrations/supabase/client";
 import { DEFAULT_MODEL } from "@/lib/defaultModel";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/edgeRuntime";
 
 
 export type KimiTodo = { id: string; title: string; done: boolean };
@@ -19,7 +20,7 @@ export type KimiEvent =
   | { type: "done"; summary?: string; files: KimiFile[] }
   | { type: "error"; error: string };
 
-const URL_ = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/kimi-coder`;
+const URL_ = `${SUPABASE_URL}/functions/v1/kimi-coder`;
 
 /**
  * Build a "current project state" preamble so the backend edits existing
@@ -132,7 +133,7 @@ export async function runKimiCoder({
   signal?: AbortSignal;
 }) {
   const { data: { session } } = await supabase.auth.getSession();
-  const anon = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  const anon = SUPABASE_ANON_KEY;
   const token = session?.access_token || anon;
   const preamble = `${MEDIA_RULES}${buildAttachmentBlock(attachments)}${buildContextPreamble(contextFiles)}`;
   const finalPrompt = preamble ? `${preamble}\nUser request:\n${prompt}` : prompt;

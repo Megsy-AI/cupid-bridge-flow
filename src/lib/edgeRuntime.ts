@@ -16,8 +16,19 @@
  * (`supabase/functions/_shared/dataProject.ts`).
  */
 
-const PRIMARY_URL = String(import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
-const PRIMARY_ANON = String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "");
+/**
+ * Fallbacks for hosts that build without the VITE_* env vars (Vercel, a fresh
+ * fork). Without them `edgeUrl()` returned a relative "/functions/v1/..." path,
+ * which the host answered with its own 404 page — the "Failed to fetch" every
+ * computer/chat call hit right after deploying. These are public client values.
+ */
+const FALLBACK_URL = "https://qdnqxjzjecaieuavagvq.supabase.co";
+const FALLBACK_ANON =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkbnF4anpqZWNhaWV1YXZhZ3ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg1MDY1NTcsImV4cCI6MjEwNDA4MjU1N30.eFK_7U7MRlktAAnQQ_9d4k7tF8N3qZ3QGhKVhH6C3Tg";
+
+const PRIMARY_URL =
+  String(import.meta.env.VITE_SUPABASE_URL || FALLBACK_URL).replace(/\/$/, "") || FALLBACK_URL;
+const PRIMARY_ANON = String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || FALLBACK_ANON);
 
 const COMPUTE_URL = String(import.meta.env.VITE_COMPUTE_SUPABASE_URL || "").replace(/\/$/, "");
 const COMPUTE_ANON = String(import.meta.env.VITE_COMPUTE_SUPABASE_ANON_KEY || "");
@@ -64,3 +75,10 @@ export function edgeHeaders(fn: string, token?: string | null): Record<string, s
     Authorization: `Bearer ${token || apikey}`,
   };
 }
+
+/**
+ * Project URL / anon key with the same fallbacks, for the few modules that build
+ * their own function URL instead of calling `edgeUrl()`.
+ */
+export const SUPABASE_URL = PRIMARY_URL;
+export const SUPABASE_ANON_KEY = PRIMARY_ANON;

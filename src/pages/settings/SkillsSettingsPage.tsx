@@ -37,6 +37,7 @@ import { resolveSkillIcon, skillEmoji } from "@/lib/skillIcon";
 
 
 import { sanitizeErrorMessage } from "@/lib/sanitizeError";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/edgeRuntime";
 type DraftSkill = Partial<Skill> & {
   name: string;
   description: string;
@@ -222,11 +223,11 @@ export default function SkillsSettingsPage() {
       } = await supabase.auth.getSession();
       const form = new FormData();
       form.append("file", file);
-      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/import-skill`;
+      const url = `${SUPABASE_URL}/functions/v1/import-skill`;
       const resp = await fetch(url, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${session?.access_token || SUPABASE_ANON_KEY}`,
         },
         body: form,
       });
@@ -712,7 +713,7 @@ function SkillDesigner({
     setInput("");
     setThinking(true);
     try {
-      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-skill`;
+      const url = `${SUPABASE_URL}/functions/v1/generate-skill`;
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -720,7 +721,7 @@ function SkillDesigner({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${session?.access_token || SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({
           messages: next.map((m) => ({ role: m.role, content: m.content })),

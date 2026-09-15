@@ -50,3 +50,12 @@
 - [done] ChatMessage: removed dead swipe hint/handlers; added Regenerate + Branch actions; ar/en labels for More/Copy/Edit/Like/Dislike/Copied/Download/Resume/interrupted; logical `end-0`/`text-start`; menu `dir` follows UI lang; touch targets 28px -> 36px.
 - [done] AppSidebar: chat search input (shown when >5 conversations) filtering titles, with "No matches" state.
 - [done] Clean-design pass: scroll-to-bottom button and sidebar search are borderless/transparent with light 1.75-stroke icons; message "More" button lost its hover fill.
+
+## Requests 15 Sep (evening)
+- [ ] Chips too small -> enlarged; verify visually.
+- [ ] Plus menu look rejected -> redesign.
+- [ ] Trial offer: show "3 days for $1" in place of $7, auto-renew to $7 after trial.
+- [ ] Computer mode "failed to fetch" on production (Vercel) -> route everything through Supabase.
+- [ ] Hide Mail (@megsyai.com) across all its pages/entries until redesigned.
+- [ ] Arabic wallet/Visa payment sheet looks bad — restyle with design tokens.
+- [ ] Arabic visitors: show prices in local currency detected from the device locale/timezone.

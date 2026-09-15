@@ -3,15 +3,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { loadMediaSettings } from "@/components/chat/mobile/MediaSettingsMenu";
 import type { Message, ChatMode } from "../chatConstants";
 import { DEFAULT_MODEL } from "@/lib/defaultModel";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/edgeRuntime";
 
 
 export type MediaPlan = any;
 
-const CHAT_EDGE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-alibaba`;
+const CHAT_EDGE_URL = `${SUPABASE_URL}/functions/v1/chat-alibaba`;
 
 async function getAccessToken(): Promise<string> {
   const { data } = await supabase.auth.getSession();
-  return data.session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  return data.session?.access_token || SUPABASE_ANON_KEY;
 }
 
 /**
@@ -111,7 +112,7 @@ async function streamLyricsFromChatEdge({
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      apikey: SUPABASE_ANON_KEY,
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({

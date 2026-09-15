@@ -17,6 +17,10 @@ const KEY = "megsy_checkout_abandoned_v1";
 
 /** Intro (first month) price shown by default. */
 export const INTRO_PRICE = 7;
+/** Paid 3-day trial that renews into the intro month automatically. */
+export const TRIAL_PRICE = 1;
+/** Length of that paid trial, in days. */
+export const TRIAL_DAYS = 3;
 /** Win-back price after an abandoned checkout. */
 export const WINBACK_PRICE = 5;
 /** Win-back yearly price (one month equivalent off the intro). */

@@ -9,13 +9,14 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { DEFAULT_MODEL } from "@/lib/defaultModel";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/edgeRuntime";
 
 export interface LlmMessage {
   role: "user" | "assistant";
   content: string;
 }
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-alibaba`;
+const CHAT_URL = `${SUPABASE_URL}/functions/v1/chat-alibaba`;
 
 
 /** One completion from the chat model. Returns "" when the call fails. */
@@ -35,7 +36,7 @@ export async function askModel(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "",
+        apikey: SUPABASE_ANON_KEY || "",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({

@@ -414,13 +414,14 @@ const AppSidebar = ({
   }> = [
   ];
 
-  // Megsy Email is always available in the sidebar.
-  moreNav.push({
-    label: "Mail",
-    Icon: (props) => <MailIcon size={props.size} className={props.className} strokeWidth={props.strokeWidth} />,
-    path: "/mail",
-    match: (p: string) => p.startsWith("/mail"),
-  });
+  // Megsy Email is hidden until the mailbox UI is reworked. Keep the entry here
+  // (commented, not deleted) so restoring it is a one-line change.
+  // moreNav.push({
+  //   label: "Mail",
+  //   Icon: (props) => <MailIcon size={props.size} className={props.className} strokeWidth={props.strokeWidth} />,
+  //   path: "/mail",
+  //   match: (p: string) => p.startsWith("/mail"),
+  // });
 
 
   // Earn is visible for everyone (site + Telegram). Tasks stays Telegram-only.

@@ -97,22 +97,25 @@ function PaymentGatewaySheetImpl({
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 10, scale: 0.985 }}
         transition={{ duration: 0.16, ease: [0.22, 0.9, 0.3, 1] }}
-        className="pointer-events-auto relative z-[101] flex w-full flex-col overflow-y-auto rounded-t-2xl border border-border bg-background px-4 pb-[calc(env(safe-area-inset-bottom,0px)+16px)] text-foreground shadow-lg sm:max-w-[420px] sm:rounded-2xl sm:px-5 md:max-h-[70vh]"
+        className="pointer-events-auto relative z-[101] flex w-full flex-col overflow-y-auto rounded-t-3xl border border-border/60 bg-background px-5 pb-[calc(env(safe-area-inset-bottom,0px)+18px)] text-foreground shadow-xl sm:max-w-[400px] sm:rounded-3xl md:max-h-[70vh]"
         style={{ fontFamily: mobileFont }}
       >
         <div className="sm:hidden pt-2.5 pb-2 flex items-center justify-center shrink-0">
           <div className="h-1 w-9 rounded-full bg-muted-foreground/25" />
         </div>
 
-        <div className="px-1 pt-1 pb-3">
-          <p className="text-sm font-semibold leading-none">{resolvedTitle}</p>
-          <p className="mt-1 text-xs leading-snug text-muted-foreground">{resolvedSubtitle}</p>
+        <div className="pt-2 pb-4">
+          <p className="text-[17px] font-semibold leading-tight">{resolvedTitle}</p>
+          <p className="mt-1.5 text-[13px] leading-snug text-muted-foreground">
+            {resolvedSubtitle}
+          </p>
         </div>
 
-        <div className="flex flex-col overflow-hidden rounded-lg border border-border bg-card">
+        <div className="flex flex-col pb-1">
           {ROWS.filter((row) => !options || options.includes(row.id)).map((row) => {
             const isLoading = loading === row.id;
             const disabled = loading !== null && !isLoading;
+            const Icon = row.id === "wallets" ? Smartphone : CreditCard;
             return (
               <Button
                 data-no-neo
@@ -121,18 +124,22 @@ function PaymentGatewaySheetImpl({
                 disabled={disabled || isLoading}
                 onClick={() => onSelect(row.id)}
                 variant="ghost"
-                className="h-14 w-full justify-start gap-3 rounded-none border-b border-border px-4 text-start last:border-b-0"
+                className="h-14 w-full justify-start gap-3 rounded-xl border-0 px-3 text-start shadow-none hover:bg-muted/60"
               >
-                <span className="grid h-8 w-8 place-items-center rounded-md bg-muted text-foreground">
-                  {row.id === "wallets" ? <Smartphone className="h-4 w-4" /> : <CreditCard className="h-4 w-4" />}
-                </span>
-                <span className="flex-1 text-sm font-medium leading-tight">
+                <Icon
+                  className="h-[18px] w-[18px] shrink-0 text-muted-foreground"
+                  strokeWidth={1.75}
+                />
+                <span className="flex-1 text-[15px] font-medium leading-tight">
                   {labels?.[row.id] ?? localizedLabels[row.id] ?? row.label}
                 </span>
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 shrink-0 animate-spin text-muted-foreground" />
                 ) : (
-                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground rtl:rotate-180" />
+                  <ChevronRight
+                    className="h-4 w-4 shrink-0 text-muted-foreground/60 rtl:rotate-180"
+                    strokeWidth={1.75}
+                  />
                 )}
               </Button>
             );
