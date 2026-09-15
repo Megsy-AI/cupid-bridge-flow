@@ -68,10 +68,11 @@ export default function MobileModeBar({ mode, onChange }: Props) {
     <div
       data-testid="mobile-mode-bar"
       dir="ltr"
-      className="flex items-center gap-2 overflow-x-auto no-scrollbar px-3 pb-2.5 min-h-[40px]"
+      // Soft pills on one quiet strip: no boxy borders, each mode carries its
+      // own hue only on the icon so the row stays calm, and the row scrolls
+      // with breathing room at both ends (the last chip used to be clipped).
+      className="flex items-center gap-2 overflow-x-auto no-scrollbar ps-3 pe-6 pb-2.5 min-h-[38px]"
       style={{ WebkitOverflowScrolling: "touch", scrollSnapType: "x proximity" }}
-
-
     >
       <AnimatePresence mode="popLayout" initial={false}>
         {activeMode ? (
@@ -85,12 +86,14 @@ export default function MobileModeBar({ mode, onChange }: Props) {
             data-active={true}
             style={{
               scrollSnapAlign: "start",
-              fontWeight: 600,
+              backgroundColor: tint(activeMode.color, 0.16),
+              color: activeMode.color,
+              boxShadow: `inset 0 0 0 1px ${tint(activeMode.color, 0.34)}`,
             }}
-            className="shrink-0 inline-flex items-center gap-2 h-10 ps-3 pe-1.5 rounded-xl bg-foreground text-background border border-foreground"
+            className="shrink-0 inline-flex items-center gap-1.5 h-9 ps-3.5 pe-1.5 rounded-full text-[13px] font-semibold"
           >
-            <activeMode.Icon size={14} strokeWidth={2.2} />
-            <span className="leading-none whitespace-nowrap text-[13px]">{tx(activeMode.label)}</span>
+            <activeMode.Icon size={15} strokeWidth={2.2} />
+            <span className="leading-none whitespace-nowrap">{tx(activeMode.label)}</span>
             <button
               type="button"
               aria-label={tx(`Remove ${activeMode.label} mode`)}
@@ -98,18 +101,14 @@ export default function MobileModeBar({ mode, onChange }: Props) {
                 haptic("soft");
                 onChange("normal");
               }}
-              className="inline-flex items-center justify-center w-7 h-7 rounded-full transition-transform"
-              style={{
-                backgroundColor: "hsl(var(--brand-ink) / 0.18)",
-                color: "hsl(var(--brand-ink))",
-                border: `1px solid hsl(var(--brand-ink) / 0.25)`,
-              }}
+              className="inline-flex items-center justify-center w-6 h-6 rounded-full transition-opacity hover:opacity-70"
+              style={{ backgroundColor: tint(activeMode.color, 0.2) }}
             >
-              <X size={14} strokeWidth={3} />
+              <X size={13} strokeWidth={2.8} />
             </button>
           </motion.div>
         ) : (
-          MODES.map(({ id, label, Icon }, i) => (
+          MODES.map(({ id, label, Icon, color }, i) => (
             <motion.button
               key={id}
               type="button"
@@ -119,18 +118,15 @@ export default function MobileModeBar({ mode, onChange }: Props) {
                 haptic("tap");
                 onChange(id);
               }}
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.96 }}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 4 }}
               transition={{ ...TAP_SPRING, delay: i * 0.02 }}
-              style={{
-                scrollSnapAlign: "start",
-                fontWeight: 500,
-              }}
-              className="shrink-0 inline-flex items-center gap-1.5 h-10 px-3.5 rounded-xl border border-border bg-card text-[13px] text-foreground transition-colors hover:bg-muted"
+              style={{ scrollSnapAlign: "start" }}
+              className="shrink-0 inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full bg-foreground/[0.05] text-[13px] font-medium text-foreground/80 transition-colors hover:bg-foreground/[0.09] active:bg-foreground/[0.12]"
             >
-              <Icon size={14} strokeWidth={2.2} className="text-foreground/70" />
+              <Icon size={15} strokeWidth={2.2} style={{ color }} />
               <span className="leading-none whitespace-nowrap">{tx(label)}</span>
             </motion.button>
           ))
