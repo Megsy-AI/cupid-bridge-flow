@@ -40,7 +40,7 @@ export function useTaskIndicators(): Record<string, TaskIndicator> {
         const since = new Date(Date.now() - RECENT_DONE_MS).toISOString();
         const { data } = await supabase
           .from("computer_tasks")
-          .select("conversation_id,status,updated_at")
+          .select("id,conversation_id,status,updated_at")
           .eq("user_id", user.id)
           .not("conversation_id", "is", null)
           .gte("updated_at", since)
@@ -53,9 +53,18 @@ export function useTaskIndicators(): Record<string, TaskIndicator> {
           if (!cid) continue;
           const status = String((row as { status?: string }).status || "");
           const running = status === "pending" || status === "running" || status === "paused";
-          if (running) next[cid] = "running";
-          else if (!next[cid]) next[cid] = "done";
+          if (running) {
+            const id = String((row as { id?: string }).id || "");
+            const touched = Date.parse(String((row as { updated_at?: string }).updated_at || "")) || 0;
+            if (id && touched && Date.now() - touched > STALE_RUNNING_MS && !reconciled.has(id)) {
+              reconciled.add(id);
+              void pollComputerTask(id).catch(() => reconciled.delete(id));
+              continue;
+            }
+            next[cid] = "running";
+          } else if (!next[cid]) next[cid] = "done";
         }
+
         setMap(next);
       } catch {
         /* the indicator is decorative — never break the sidebar */
