@@ -243,7 +243,7 @@ const ThinkingTrace = ({
                     {showTool ? (
                       <ToolIcon name={tool as string} size={13} />
                     ) : (() => {
-                      const Glyph = isCurrent ? stepGlyph(line) : Check;
+                      const Glyph = stepGlyph(line);
                       return <Glyph className="h-3.5 w-3.5" strokeWidth={2} />;
                     })()}
                   </span>
