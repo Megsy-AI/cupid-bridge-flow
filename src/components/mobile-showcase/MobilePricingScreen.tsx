@@ -16,6 +16,7 @@ import { Link, useNavigate } from "react-router-dom";
 import MegsyStar from "@/components/branding/MegsyStar";
 import { MobileSidebarButton } from "@/components/shared/MobileSidebarButton";
 import { useUserLang } from "@/lib/authI18n";
+import { detectLocalMoney, formatLocalPrice } from "@/lib/localCurrency";
 import { useUserPlan } from "@/hooks/useUserPlan";
 import { getDisplayPrice, getPlan, type PlanTier } from "@/data/pricingData";
 import {
@@ -90,6 +91,7 @@ export default function MobilePricingScreen({
   const isAr = lang === "ar-eg";
   const isLight = useIsLightTheme();
   const compact = useCompactHeight();
+  const localPrice = useLocalPrice();
   const isLoading = loadingTier === "pro";
   const navigate = useNavigate();
   // A subscriber must never be told to "upgrade" to the plan they already own.
