@@ -51,16 +51,24 @@ export const Route = createFileRoute("/")({
 
 function SpaMount() {
   const [booted, setBooted] = useState(false);
+  const [failed, setFailed] = useState(false);
   useEffect(() => {
     let cancelled = false;
-    void loadChunk(() => import("@/lib/spaBoot")).then(() => {
-      if (!cancelled) setBooted(true);
-    });
+    void loadChunk(() => import("@/lib/spaBoot")).then(
+      () => {
+        if (!cancelled) setBooted(true);
+      },
+      () => {
+        // Never leave the screen stuck on the boot mark: surface a retry.
+        if (!cancelled) setFailed(true);
+      },
+    );
     return () => {
       cancelled = true;
     };
   }, []);
 
+  if (failed) return <BootFailed />;
   if (!booted) return null;
   return (
     <Suspense fallback={null}>
