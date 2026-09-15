@@ -420,6 +420,11 @@ export default function MobilePricingScreen({
                     <span className="text-[11.5px] line-through" style={{ color: c.faint }}>
                       ${opt.strike}
                     </span>
+                    {localPrice(opt.price) ? (
+                      <span className="text-[11px]" style={{ color: c.faint }}>
+                        {localPrice(opt.price)}
+                      </span>
+                    ) : null}
                   </span>
                 </span>
               </button>
