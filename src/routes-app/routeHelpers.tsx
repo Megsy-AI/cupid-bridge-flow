@@ -7,6 +7,7 @@ import { usePromoBanner } from "@/components/promo/usePromoBanner";
 import { useSidebarCollapsed } from "@/hooks/useSidebarCollapsed";
 import { useTrackInAppNavigation } from "@/hooks/useSmartBack";
 import { pathForZone, stripZonePrefix } from "@/lib/zoneRouting";
+import { prefetchNextHop } from "@/lib/nextHop";
 import { bootstrapAuth, getAuthState, subscribeAuthState } from "@/lib/authStore";
 import { UnlimitedPromoBanner } from "./lazyPages";
 // Redirect legacy /tools/<slug> to /images/tools/<slug>
@@ -39,27 +40,11 @@ export const LegacyAiRedirect = () => {
 
 
 /**
- * Route chunks are warmed up-front (see `warmRoutes`), so a screen almost never
- * has to wait. Keep the fallback completely invisible for the first moments so a
- * fast chunk never flashes a loading screen; only a genuinely slow load shows a
- * small spinner instead of a full-screen takeover.
+ * No loading screen, ever. The next screen is prefetched from the current one
+ * (`@/lib/nextHop`) and `DeferredRoutes` keeps the previous page painted while a
+ * chunk resolves, so a visible fallback would only ever be a flash of nothing.
  */
-export const LazyFallback = () => {
-  const [slow, setSlow] = useState(false);
-  useEffect(() => {
-    const timer = window.setTimeout(() => setSlow(true), 900);
-    return () => window.clearTimeout(timer);
-  }, []);
-  if (!slow) return null;
-  return (
-    <div className="pointer-events-none fixed inset-x-0 top-3 z-50 flex justify-center">
-      <div
-        className="h-4 w-4 animate-spin rounded-full border-2 border-border border-t-primary"
-        aria-label="Loading"
-      />
-    </div>
-  );
-};
+export const LazyFallback = () => null;
 
 
 
@@ -74,6 +59,13 @@ export const DeferredRoutes = ({ children }: { children: React.ReactNode }) => {
   const deferredLocation = useDeferredValue(location);
   const isPending = deferredLocation !== location;
   useTrackInAppNavigation();
+
+  // Warm the screens reachable from this one, so the next tap has nothing to
+  // download. Runs per navigation and is a no-op on 2G / data-saver.
+  useEffect(() => {
+    prefetchNextHop(location.pathname);
+  }, [location.pathname]);
+
 
   useEffect(() => {
     const root = document.documentElement;

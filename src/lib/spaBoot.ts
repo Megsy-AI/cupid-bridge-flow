@@ -147,8 +147,9 @@ const runIdle = (fn: () => void) => {
 runIdle(() => {
   try { installGlobalLinkPrefetch(); } catch {}
   try { installSnapshotCapture(); } catch {}
-  // Warm every page chunk in the background so no screen shows a loading state.
-  void import("@/lib/warmRoutes").then((m) => m.warmRoutes()).catch(() => {});
+  // Page chunks are no longer warmed in bulk: downloading every screen after
+  // boot starved the current one on 3G/4G. `@/lib/nextHop` warms only the one
+  // or two screens reachable from where the user actually is.
 });
 
 

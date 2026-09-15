@@ -16,6 +16,7 @@ import { Link, useNavigate } from "react-router-dom";
 import MegsyStar from "@/components/branding/MegsyStar";
 import { MobileSidebarButton } from "@/components/shared/MobileSidebarButton";
 import { useUserLang } from "@/lib/authI18n";
+import { detectLocalMoney, formatLocalPrice } from "@/lib/localCurrency";
 import { useUserPlan } from "@/hooks/useUserPlan";
 import { getDisplayPrice, getPlan, type PlanTier } from "@/data/pricingData";
 import {
@@ -28,6 +29,19 @@ import {
 function MegsyFeatureIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return <MegsyStar className={className ?? "h-5 w-5"} />;
 }
+
+/**
+ * "≈ 50 EGP" beside the dollar price, from the device's own country. Resolved
+ * after mount so the first paint matches the server markup.
+ */
+function useLocalPrice() {
+  const [money, setMoney] = useState<ReturnType<typeof detectLocalMoney>>(null);
+  useEffect(() => {
+    setMoney(detectLocalMoney());
+  }, []);
+  return (usd: number) => formatLocalPrice(usd, money);
+}
+
 
 function useCompactHeight() {
   const [compact, setCompact] = useState(
@@ -77,6 +91,7 @@ export default function MobilePricingScreen({
   const isAr = lang === "ar-eg";
   const isLight = useIsLightTheme();
   const compact = useCompactHeight();
+  const localPrice = useLocalPrice();
   const isLoading = loadingTier === "pro";
   const navigate = useNavigate();
   // A subscriber must never be told to "upgrade" to the plan they already own.
@@ -420,6 +435,11 @@ export default function MobilePricingScreen({
                     <span className="text-[11.5px] line-through" style={{ color: c.faint }}>
                       ${opt.strike}
                     </span>
+                    {localPrice(opt.price) ? (
+                      <span className="text-[11px]" style={{ color: c.faint }}>
+                        {localPrice(opt.price)}
+                      </span>
+                    ) : null}
                   </span>
                 </span>
               </button>
