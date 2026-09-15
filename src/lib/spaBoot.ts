@@ -119,6 +119,18 @@ if (typeof window !== "undefined" && isInsideTelegram()) {
   }
 })();
 
+// React Router creates its history index with replaceState when none exists.
+// Doing that inside <BrowserRouter>'s render makes the outer TanStack router
+// update at the same time. Seed the index before React mounts instead.
+(() => {
+  try {
+    const state = window.history.state;
+    if (typeof state?.idx !== "number") {
+      window.history.replaceState({ ...(state ?? {}), idx: 0 }, "");
+    }
+  } catch {}
+})();
+
 patchSupabaseAuth();
 // Run immediately: preview hosts must unregister an old production worker
 // before any route chunk is requested. Registration itself remains deferred
