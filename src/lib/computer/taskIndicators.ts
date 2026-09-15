@@ -8,11 +8,21 @@
  */
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { pollComputerTask } from "./client";
 
 export type TaskIndicator = "running" | "done";
 
 const RECENT_DONE_MS = 24 * 60 * 60 * 1000;
 const POLL_MS = 20_000;
+/**
+ * A row that still says `running` but has not been touched for this long is
+ * abandoned bookkeeping (tab closed mid-run, or a task that finished before the
+ * row was reconciled). Re-poll it once: the poll writes the real terminal state
+ * back, so the sidebar can never show a task as running forever.
+ */
+const STALE_RUNNING_MS = 10 * 60 * 1000;
+const reconciled = new Set<string>();
+
 
 export function useTaskIndicators(): Record<string, TaskIndicator> {
   const [map, setMap] = useState<Record<string, TaskIndicator>>({});
