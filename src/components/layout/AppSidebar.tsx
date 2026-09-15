@@ -363,7 +363,13 @@ const AppSidebar = ({
   const initial = displayName.charAt(0).toUpperCase() || "U";
   const [collapsed, setCollapsed, toggleCollapsed] = useSidebarCollapsed();
   const isCollapsed = inline && collapsed && !forceExpanded;
-  const groups = useMemo(() => groupByDate(conversations), [conversations]);
+  const [convQuery, setConvQuery] = useState("");
+  const matchingConversations = useMemo(() => {
+    const q = convQuery.trim().toLowerCase();
+    if (!q) return conversations;
+    return conversations.filter((c) => (c.title || "").toLowerCase().includes(q));
+  }, [conversations, convQuery]);
+  const groups = useMemo(() => groupByDate(matchingConversations), [matchingConversations]);
   const flatConversations = useMemo(() => Object.values(groups).flat(), [groups]);
   const sectionAccent = useMemo(
     () => sectionAccentFor(stripZonePrefix(location.pathname), currentMode),
