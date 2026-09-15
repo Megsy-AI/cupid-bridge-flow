@@ -32,10 +32,11 @@
   `intentDetector`, `openManus`, `coderStackBlitz`, `persistentCache`, …), the leftover
   template `src/styles.css` removed, and 26 unused npm packages dropped (antd, recharts,
   `@lobehub/ui`, `@imgly/background-removal`, unused Radix packages, …).
+- Visual QA: auth videos now cover every tested viewport, long labels and settings rows wrap,
+  the chat composer stays visually stable on focus, and narrow-phone loading no longer goes blank.
+- React 19 nested-router warning removed by seeding browser history before React mounts.
 
 ## Open
-- React 19 warning "Cannot update a component while rendering a different component"
-  (Transitioner / nested BrowserRouter). Noisy only; the fix touches SPA boot.
 - On mobile, Enter inserts a newline instead of sending; only the Send button sends.
 - The Learning mode chip needs horizontal scrolling in the mobile mode bar to be reachable.
 - MCP / Integrations and Files were not exercised end to end in this pass.
