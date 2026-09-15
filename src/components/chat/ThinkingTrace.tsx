@@ -1,5 +1,22 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react";
-import { Check, ChevronDown } from "lucide-react";
+import {
+  ArrowDownWideNarrow,
+  BookOpen,
+  Brain,
+  CheckCircle2,
+  ChevronDown,
+  Clock,
+  Globe,
+  Image as ImageIcon,
+  Keyboard,
+  Layers,
+  MousePointerClick,
+  Save,
+  Search,
+  Sparkles,
+  Terminal,
+  Video,
+} from "lucide-react";
 import ToolIcon from "./primitives/ToolIcon";
 import MegsyStar from "@/components/branding/MegsyStar";
 import { BrandLogo } from "@/components/brand/BrandLogo";
@@ -33,6 +50,30 @@ export interface ThinkingTraceProps {
 }
 
 const RTL_LANGS = new Set(["ar", "ar-eg", "fa", "he"]);
+
+/**
+ * Pick a real glyph for a trace step from what the step actually did. Kept
+ * deliberately small and conservative: when nothing matches we fall back to a
+ * quiet sparkles mark rather than guessing loudly.
+ */
+function stepGlyph(line: string): typeof Globe {
+  const t = line.toLowerCase();
+  if (/search|بحث|أبحث|ابحث/.test(t)) return Search;
+  if (/open|visit|navigat|فتح|يفتح|تصفح|browse/.test(t)) return Globe;
+  if (/click|tap|press|ضغط|يضغط|نقر/.test(t)) return MousePointerClick;
+  if (/type|typed|fill|enter(ed)?\b|كتب|يكتب|كتابة/.test(t)) return Keyboard;
+  if (/scroll|سكرول/.test(t)) return ArrowDownWideNarrow;
+  if (/read|extract|found|قراءة|يقرأ|استخرج/.test(t)) return BookOpen;
+  if (/save|download|upload|file|حفظ|ملف/.test(t)) return Save;
+  if (/code|exec|terminal|run\b|ran\b|برمج|كود|ينفذ/.test(t)) return Terminal;
+  if (/image|صورة|صور/.test(t)) return ImageIcon;
+  if (/video|فيديو/.test(t)) return Video;
+  if (/slide|عرض تقديمي|شرائح/.test(t)) return Layers;
+  if (/wait|انتظار|ينتظر/.test(t)) return Clock;
+  if (/finish|done|complete|انته|اكتمل|تم /.test(t)) return CheckCircle2;
+  if (/think|plan|تحليل|يفكر|أخطط|planning/.test(t)) return Brain;
+  return Sparkles;
+}
 
 /**
  * Icons are never guessed from the wording of a step. A tool icon appears only
@@ -196,13 +237,14 @@ const ThinkingTrace = ({
                 >
                   <span
                     aria-hidden
-                    className={`-ms-[27px] mt-0.5 grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full border bg-background ${isCurrent ? "border-primary/70 text-primary" : "border-border/70 text-muted-foreground"}`}
+                    className={`-ms-[27px] mt-0.5 grid h-[18px] w-[18px] shrink-0 place-items-center ${isCurrent ? "text-primary" : "text-muted-foreground/70"}`}
                   >
                     {showTool ? (
-                      <ToolIcon name={tool as string} size={11} />
-                    ) : (
-                      <span className={`h-[5px] w-[5px] rounded-full ${isCurrent ? "bg-primary" : "bg-border"}`} />
-                    )}
+                      <ToolIcon name={tool as string} size={13} />
+                    ) : (() => {
+                      const Glyph = stepGlyph(line);
+                      return <Glyph className="h-3.5 w-3.5" strokeWidth={2} />;
+                    })()}
                   </span>
                   <span className="min-w-0 flex-1 break-words">{line}</span>
                 </li>
@@ -282,13 +324,14 @@ const ThinkingTrace = ({
                     >
                       <span
                         aria-hidden
-                        className={`-ms-[22px] mt-0.5 grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full border bg-background ${isCurrent ? "border-primary/50 text-primary" : "border-border/70 text-muted-foreground"}`}
+                        className={`-ms-[22px] mt-0.5 grid h-[18px] w-[18px] shrink-0 place-items-center ${isCurrent ? "text-primary" : "text-muted-foreground/70"}`}
                       >
                         {showTool ? (
-                          <ToolIcon name={tool as string} size={11} />
-                        ) : (
-                          <Check className="h-3 w-3" strokeWidth={2.6} />
-                        )}
+                          <ToolIcon name={tool as string} size={13} />
+                        ) : (() => {
+                          const Glyph = stepGlyph(line);
+                          return <Glyph className="h-3.5 w-3.5" strokeWidth={2} />;
+                        })()}
                       </span>
                       <span className="min-w-0 break-words">{line}</span>
                     </li>
