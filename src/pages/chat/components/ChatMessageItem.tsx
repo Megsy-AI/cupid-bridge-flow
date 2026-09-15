@@ -338,7 +338,17 @@ const ChatMessageItemImpl = ({
             ) : undefined
           }
           hideActions={
-            msg.role === "assistant" && (!!msg.docsClarify || hasRunningTool || mediaPending)
+            msg.role === "assistant" &&
+            (!!msg.docsClarify ||
+              hasRunningTool ||
+              mediaPending ||
+              // An agent turn that is still working externally (cloud computer,
+              // long run, operator) has only written an interim note so far.
+              // Rating / copy / regenerate must wait for the real final answer.
+              !!msg.longRunId ||
+              !!msg.computerTaskId ||
+              !!msg.operatorRunId ||
+              (isLastAssistant && (isLoading || !!isThinking)))
           }
         />
       )}

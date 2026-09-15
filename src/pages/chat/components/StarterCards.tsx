@@ -33,8 +33,8 @@ const handleCardClick = (
 };
 
 const chipClass =
-  "group inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card " +
-  "px-3.5 hover:bg-muted active:scale-[0.97] " +
+  "group inline-flex h-11 min-w-[124px] items-center justify-center gap-2.5 rounded-2xl border border-border bg-card " +
+  "px-6 hover:bg-muted active:scale-[0.97] " +
   "transition-[background-color,transform] duration-150";
 
 const iconClass =
@@ -91,8 +91,8 @@ export function StarterCards({ onPick, className = "" }: StarterCardsProps) {
             type="button"
             onClick={() => handleCardClick(c, onPick)}
             className={
-              "group flex h-10 shrink-0 items-center gap-2 rounded-xl " +
-              "border border-border bg-card px-3.5 " +
+              "group flex h-11 min-w-[116px] shrink-0 items-center justify-center gap-2.5 rounded-2xl " +
+              "border border-border bg-card px-5 " +
               "hover:bg-muted active:scale-[0.97] transition-[background-color,transform] duration-150"
             }
           >
