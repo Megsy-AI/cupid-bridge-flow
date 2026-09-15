@@ -811,6 +811,22 @@ const AppSidebar = ({
                   description="Start a new chat and it will show up here."
                 />
               ) : (
+                <>
+                {conversations.length > 5 && (
+                  <div className="sticky top-0 z-10 -mx-2 mb-2 bg-[hsl(var(--sidebar-background,var(--background)))]/95 px-2 pb-2 pt-1 backdrop-blur-sm">
+                    <input
+                      type="search"
+                      value={convQuery}
+                      onChange={(e) => setConvQuery(e.target.value)}
+                      placeholder="Search chats"
+                      aria-label="Search chats"
+                      className="h-9 w-full rounded-lg border border-border/60 bg-muted/40 px-3 text-[13px] text-foreground placeholder:text-muted-foreground/70 focus:border-border focus:outline-none"
+                    />
+                  </div>
+                )}
+                {flatConversations.length === 0 ? (
+                  <EmptyState compact title="No matches" description="Try a different word." />
+                ) : (
                 <ul className="space-y-1">
                 {flatConversations.map((conv) => {
                       const onChatPage = currentAppPath === "/chat";
