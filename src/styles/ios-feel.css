@@ -52,8 +52,9 @@ a,
   will-change: transform;
 }
 
-/* 4. iOS-style focus ring. Only for keyboard users. */
-:focus-visible {
+/* 4. iOS-style focus ring. Only for keyboard users, and never on text fields
+   (they own their own focus styling — a global outline reads as a hard edge). */
+:where(a, button, [role="button"], select, summary, [tabindex]):focus-visible {
   outline: 2px solid hsl(var(--primary));
   outline-offset: 3px;
   border-radius: 8px;

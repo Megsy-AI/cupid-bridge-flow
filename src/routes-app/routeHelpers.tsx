@@ -38,12 +38,28 @@ export const LegacyAiRedirect = () => {
 };
 
 
-/** A real fallback prevents slow route chunks from looking like a white crash. */
-export const LazyFallback = () => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-background text-foreground">
-    <div className="h-5 w-5 animate-spin rounded-full border-2 border-border border-t-primary" aria-label="Loading" />
-  </div>
-);
+/**
+ * Route chunks are warmed up-front (see `warmRoutes`), so a screen almost never
+ * has to wait. Keep the fallback completely invisible for the first moments so a
+ * fast chunk never flashes a loading screen; only a genuinely slow load shows a
+ * small spinner instead of a full-screen takeover.
+ */
+export const LazyFallback = () => {
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setSlow(true), 900);
+    return () => window.clearTimeout(timer);
+  }, []);
+  if (!slow) return null;
+  return (
+    <div className="pointer-events-none fixed inset-x-0 top-3 z-50 flex justify-center">
+      <div
+        className="h-4 w-4 animate-spin rounded-full border-2 border-border border-t-primary"
+        aria-label="Loading"
+      />
+    </div>
+  );
+};
 
 
 

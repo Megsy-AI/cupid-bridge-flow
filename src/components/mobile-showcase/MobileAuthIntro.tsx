@@ -129,8 +129,11 @@ export default function MobileAuthIntro({
 
       {/* Content pinned to bottom */}
       <div
-        className="absolute inset-x-0 bottom-0 px-6 pb-10 pointer-events-auto"
-        style={{ zIndex: 4, paddingBottom: "max(2.25rem, env(safe-area-inset-bottom, 0px))" }}
+        className="absolute inset-x-0 bottom-0 px-6 pointer-events-auto"
+        style={{
+          zIndex: 4,
+          paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom, 0px))",
+        }}
       >
         {/* Title */}
         <h1
@@ -138,16 +141,14 @@ export default function MobileAuthIntro({
           style={{
             fontFamily: '"Inter", sans-serif',
             fontWeight: 900,
-            fontSize: "clamp(40px, 12vw, 52px)",
-            lineHeight: "0.94",
-            letterSpacing: "0",
+            fontSize: "clamp(36px, 10.5vw, 48px)",
+            lineHeight: "1.02",
+            letterSpacing: "-0.01em",
             textShadow: "0 1px 3px rgba(0,0,0,.55)",
           }}
         >
           <span className="block">{t.title1}</span>
-          <span className="block text-foreground/55 mt-1">
-            {t.title2}
-          </span>
+          <span className="block text-foreground/70">{t.title2}</span>
         </h1>
 
         {/* Inline error notification */}
@@ -170,7 +171,7 @@ export default function MobileAuthIntro({
         </AnimatePresence>
 
         {/* CTAs */}
-        <form onSubmit={submitForm} noValidate className="mt-7 space-y-2.5">
+        <form onSubmit={submitForm} noValidate className="mt-8 space-y-3">
           {/* Google button — collapses away when expanded */}
           <AnimatePresence initial={false}>
             {!expanded && (

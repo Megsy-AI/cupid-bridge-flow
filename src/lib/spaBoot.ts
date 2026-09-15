@@ -147,6 +147,8 @@ const runIdle = (fn: () => void) => {
 runIdle(() => {
   try { installGlobalLinkPrefetch(); } catch {}
   try { installSnapshotCapture(); } catch {}
+  // Warm every page chunk in the background so no screen shows a loading state.
+  void import("@/lib/warmRoutes").then((m) => m.warmRoutes()).catch(() => {});
 });
 
 
