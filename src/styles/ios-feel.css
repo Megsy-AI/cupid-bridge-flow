@@ -249,17 +249,21 @@ html {
   }
 }
 
-/* 18. Composer focus glow — subtle ring while textarea is focused. */
+/* 18. Composer focus state — keep the surface stable while typing. */
 .composer-card {
   transition:
     border-color 220ms ease,
     box-shadow 260ms ease;
 }
 .composer-card:focus-within {
-  border-color: hsl(var(--foreground) / 0.75) !important;
-  box-shadow:
-    0 0 0 4px hsl(var(--primary) / 0.1),
-    0 8px 28px -16px hsl(var(--primary) / 0.35) !important;
+  border-color: hsl(var(--foreground) / 0.12) !important;
+  box-shadow: 0 12px 34px -24px hsl(var(--foreground) / 0.28) !important;
+}
+
+.chat-composer-frame textarea:focus,
+.chat-composer-frame textarea:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* 19. Frosted bottom edge behind the mobile composer (iOS Messages). */

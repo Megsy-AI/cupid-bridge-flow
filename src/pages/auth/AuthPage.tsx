@@ -1315,13 +1315,14 @@ const AuthPage = () => {
           <img loading="lazy" decoding="async"
             src={`${AUTH_ASSET_BASE}/auth-mobile-fallback.webp`}
             alt=""
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${videoLoaded ? "opacity-0" : "opacity-100"}`}
+            className={`absolute inset-0 block h-full min-h-full w-full min-w-full max-w-none object-cover transition-opacity duration-700 ${videoLoaded ? "opacity-0" : "opacity-100"}`}
           />
           <div
             className={`absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent transition-opacity duration-700 ${videoLoaded ? "opacity-0" : "opacity-100"}`}
           />
           {!isMobile && (
           <video
+            data-auth-hero-video
             poster={AUTH_HERO_POSTER}
             autoPlay
             loop
@@ -1329,7 +1330,7 @@ const AuthPage = () => {
             playsInline
             preload="metadata"
             onLoadedData={() => setVideoLoaded(true)}
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 block h-full min-h-full w-full min-w-full max-w-none object-cover"
           >
             <source src={AUTH_HERO_MP4} type="video/mp4" />
           </video>
