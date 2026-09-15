@@ -106,9 +106,12 @@ export function useChatScroll(params: {
   // Keep a reply pinned only while the user remains near the bottom. A manual
   // upward scroll releases the pin immediately, so streaming never fights the
   // user's touch gesture or makes the transcript feel frozen.
+  // This runs at all times (not only while `isLoading`): the thinking panel
+  // appears, grows and is then replaced by the answer, and each of those height
+  // changes would otherwise leave the transcript looking scrolled upward.
   useEffect(() => {
     const el = messagesContainerRef.current;
-    if (!el || !isLoading) return;
+    if (!el) return;
     const content = el.firstElementChild;
     if (!(content instanceof HTMLElement)) return;
 
@@ -128,6 +131,7 @@ export function useChatScroll(params: {
       cancelAnimationFrame(frame);
     };
   }, [isLoading, messagesContainerRef]);
+
 
   return { handleScroll, scrollToBottom };
 }
