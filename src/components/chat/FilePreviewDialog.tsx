@@ -27,7 +27,7 @@ export default function FilePreviewDialog({
   onClose: () => void;
 }) {
   const lang = useUserLang();
-  const ar = lang === "ar";
+  const ar = lang === "ar-eg";
 
   // Escape closes the viewer, and the page behind it must not scroll while the
   // full-screen surface is open.
