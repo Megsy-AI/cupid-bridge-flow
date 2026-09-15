@@ -1491,19 +1491,7 @@ const ChatMessage = ({
       aria-live={role === "assistant" && isStreaming ? "polite" : undefined}
       aria-busy={role === "assistant" && isStreaming ? true : undefined}
       className="mb-6 relative animate-message-rise"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
     >
-      {swipeHint && (
-        <div
-          className={`pointer-events-none absolute top-2 z-10 px-2 py-1 rounded-md text-[11px] font-medium bg-primary/15 text-primary backdrop-blur-md ${
-            swipeHint === "regen" ? "right-2" : "left-2"
-          }`}
-        >
-          {swipeHint === "regen" ? "↻ Regenerate" : "⑂ Branch"}
-        </div>
-      )}
       <MessageContent>
         {showNarration && (
           <ThinkingTrace
