@@ -29,6 +29,19 @@ function MegsyFeatureIcon({ className, style }: { className?: string; style?: Re
   return <MegsyStar className={className ?? "h-5 w-5"} />;
 }
 
+/**
+ * "≈ 50 EGP" beside the dollar price, from the device's own country. Resolved
+ * after mount so the first paint matches the server markup.
+ */
+function useLocalPrice() {
+  const [money, setMoney] = useState<ReturnType<typeof detectLocalMoney>>(null);
+  useEffect(() => {
+    setMoney(detectLocalMoney());
+  }, []);
+  return (usd: number) => formatLocalPrice(usd, money);
+}
+
+
 function useCompactHeight() {
   const [compact, setCompact] = useState(
     typeof window !== "undefined" && window.innerHeight < 780,
