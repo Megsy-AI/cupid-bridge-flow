@@ -325,13 +325,14 @@ const ThinkingTrace = ({
                     >
                       <span
                         aria-hidden
-                        className={`-ms-[22px] mt-0.5 grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full border bg-background ${isCurrent ? "border-primary/50 text-primary" : "border-border/70 text-muted-foreground"}`}
+                        className={`-ms-[22px] mt-0.5 grid h-[18px] w-[18px] shrink-0 place-items-center ${isCurrent ? "text-primary" : "text-muted-foreground/70"}`}
                       >
                         {showTool ? (
-                          <ToolIcon name={tool as string} size={11} />
-                        ) : (
-                          <Check className="h-3 w-3" strokeWidth={2.6} />
-                        )}
+                          <ToolIcon name={tool as string} size={13} />
+                        ) : (() => {
+                          const Glyph = stepGlyph(line);
+                          return <Glyph className="h-3.5 w-3.5" strokeWidth={2} />;
+                        })()}
                       </span>
                       <span className="min-w-0 break-words">{line}</span>
                     </li>
