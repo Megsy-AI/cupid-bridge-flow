@@ -1,5 +1,23 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react";
-import { Check, ChevronDown } from "lucide-react";
+import {
+  ArrowDownWideNarrow,
+  BookOpen,
+  Brain,
+  Check,
+  CheckCircle2,
+  ChevronDown,
+  Clock,
+  Globe,
+  Image as ImageIcon,
+  Keyboard,
+  Layers,
+  MousePointerClick,
+  Save,
+  Search,
+  Sparkles,
+  Terminal,
+  Video,
+} from "lucide-react";
 import ToolIcon from "./primitives/ToolIcon";
 import MegsyStar from "@/components/branding/MegsyStar";
 import { BrandLogo } from "@/components/brand/BrandLogo";
