@@ -875,6 +875,8 @@ const AppSidebar = ({
                       );
                     })}
                 </ul>
+                )}
+                </>
               )
             ) : (
               <SidebarSubNav
