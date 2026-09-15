@@ -35,16 +35,23 @@ function SpaMount() {
   // Boot side effects (snapshot cleanup, auth patch, perf tier, welcome
   // redirect, global listeners) must run BEFORE the app tree mounts.
   const [booted, setBooted] = useState(false);
+  const [failed, setFailed] = useState(false);
   useEffect(() => {
     let cancelled = false;
-    void loadChunk(() => import("@/lib/spaBoot")).then(() => {
-      if (!cancelled) setBooted(true);
-    });
+    void loadChunk(() => import("@/lib/spaBoot")).then(
+      () => {
+        if (!cancelled) setBooted(true);
+      },
+      () => {
+        if (!cancelled) setFailed(true);
+      },
+    );
     return () => {
       cancelled = true;
     };
   }, []);
 
+  if (failed) return <BootFailed />;
   if (!booted) return null;
   return (
     <Suspense fallback={null}>
