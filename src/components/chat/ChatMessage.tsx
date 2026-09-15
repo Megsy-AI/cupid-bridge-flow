@@ -395,15 +395,27 @@ const looksLikeSlidesInfo = (text: string) => {
   return slideLabels.length >= 3 || slideMarkers.length >= 2;
 };
 
+/**
+ * Learn cards arrive as ```learn / ```learn_card / ```json fences and are
+ * rendered as cards, so the raw fence is removed from the body text.
+ *
+ * The language label is REQUIRED in these patterns. With it optional, the
+ * pattern matched EVERY fenced block, so any ordinary code answer (python, ts,
+ * sql, bash) had its code silently deleted and the user saw only the sentence
+ * introducing code that never appeared.
+ */
+const LEARN_FENCE_G = /```[ \t]*(?:learn|learn_card|json)\b[\s\S]*?```/gi;
+const LEARN_FENCE_OPEN_G = /```[ \t]*(?:learn|learn_card|json)\b[\s\S]*?(?:```|$)/gi;
+
 const cleanLearnSegmentText = (text: string) =>
   text
-    .replace(/```\s*(?:learn|learn_card|json)?\s*[\s\S]*?```/gi, "")
-    .replace(/```\s*(?:learn|learn_card|json)?\s*/gi, "")
+    .replace(LEARN_FENCE_G, "")
+    .replace(/```[ \t]*(?:learn|learn_card|json)\b[ \t]*/gi, "")
     .replace(/`{2,}\s*\\?\s*/g, "")
     .trim();
 
-const stripLearnBlocks = (text: string) =>
-  text.replace(/```\s*(?:learn|learn_card|json)?\s*[\s\S]*?(?:```|$)/gi, "").trim();
+const stripLearnBlocks = (text: string) => text.replace(LEARN_FENCE_OPEN_G, "").trim();
+
 
 const MarkdownRenderer = ({
   content,
