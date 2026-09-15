@@ -133,252 +133,165 @@ const DesktopGroup = ({ title, children }: { title?: string; children: React.Rea
   </div>
 );
 
+/**
+ * The "+" menu, ChatGPT-style: one flat list of plain rows — icon, label, and
+ * (only where it carries state) a trailing value. No tiles, no two-line
+ * descriptions, no second layout for desktop; the same list renders everywhere
+ * so the menu reads identically on a phone and on a laptop.
+ */
 const PlusMain = (p: PlusContentProps) => {
   const language = useUserLang();
   const isArabic = language === "ar-eg";
-  type Tile = { id: string; label: string; Icon: any; onClick: () => void };
   const [searchMode, setSearchMode] = useWebSearchMode();
   const [searchOpen, setSearchOpen] = useState(false);
-  const searchLabel = searchMode === "on" ? "On" : searchMode === "off" ? "Off" : "Auto";
+  const searchLabel =
+    searchMode === "on"
+      ? isArabic
+        ? "مفتوح"
+        : "On"
+      : searchMode === "off"
+        ? isArabic
+          ? "مقفول"
+          : "Off"
+        : isArabic
+          ? "تلقائي"
+          : "Auto";
 
   const closeThen = (fn: () => void) => () => {
     p.setPlusMenuOpen(false);
     fn();
   };
 
-  // Mobile quick actions — the two most common attachment types only.
-  const quickTiles: Tile[] = [
-    { id: "files", label: isArabic ? "ملفات" : "Files", Icon: Paperclip, onClick: closeThen(() => p.fileInputRef.current?.click()) },
-    { id: "photos", label: isArabic ? "الصور" : "Images", Icon: Images, onClick: closeThen(() => p.imageInputRef.current?.click()) },
-  ];
-
-  type RowItem = {
+  type MenuItem = {
     id: string;
     label: string;
-    desc?: string;
     Icon: any;
     value?: string;
-    active?: boolean;
+    expanded?: boolean;
     onClick: () => void;
   };
 
-  const rows: RowItem[] = [
+  const items: MenuItem[] = [
+    {
+      id: "photos",
+      label: isArabic ? "إضافة صور" : "Add photos",
+      Icon: Images,
+      onClick: closeThen(() => p.imageInputRef.current?.click()),
+    },
+    {
+      id: "files",
+      label: isArabic ? "إضافة ملفات" : "Add files",
+      Icon: Paperclip,
+      onClick: closeThen(() => p.fileInputRef.current?.click()),
+    },
+    {
+      id: "search",
+      label: isArabic ? "البحث في الويب" : "Web search",
+      Icon: Globe,
+      value: searchLabel,
+      expanded: searchOpen,
+      onClick: () => setSearchOpen((v) => !v),
+    },
     {
       id: "skills",
       label: isArabic ? "المهارات" : "Skills",
-      desc: isArabic ? "خصص طريقة عمل Megsy" : "Customize how Megsy works",
       Icon: Blocks,
       onClick: closeThen(() => p.navigate("/settings/skills")),
     },
+    {
+      id: "integrations",
+      label: isArabic ? "التطبيقات المربوطة" : "Integrations",
+      Icon: Plug,
+      onClick: closeThen(() =>
+        window.dispatchEvent(new CustomEvent("megsy:open-integrations")),
+      ),
+    },
   ];
-
-
-  const SheetRow = ({ item, expanded }: { item: RowItem; expanded?: boolean }) => (
-    <button
-      data-no-neo
-      type="button"
-      onClick={item.onClick}
-        className="plus-row flex min-h-[68px] w-full items-center gap-3 border-0 bg-transparent px-3 py-2.5 text-start"
-    >
-      <span
-        className={`grid h-11 w-11 shrink-0 place-items-center rounded-full ${
-          item.active ? "text-primary" : "text-foreground/80"
-        }`}
-        style={{ background: "hsl(var(--foreground) / 0.055)" }}
-      >
-        <item.Icon className="h-[21px] w-[21px]" strokeWidth={1.8} />
-      </span>
-      <span className="flex-1 min-w-0 flex flex-col gap-1">
-        <span className="text-[16px] font-medium leading-none text-foreground">
-          {item.label}
-        </span>
-        {item.desc && (
-          <span className="break-words text-[12px] leading-snug text-muted-foreground">
-            {item.desc}
-          </span>
-        )}
-      </span>
-      {item.value && (
-        <span
-          className={`shrink-0 text-[12px] font-medium ${
-            item.active ? "text-primary" : "text-muted-foreground"
-          }`}
-        >
-          {item.value}
-        </span>
-      )}
-      <ChevronLeft
-        className={`shrink-0 h-[16px] w-[16px] text-muted-foreground/60 transition-transform duration-200 ${
-          expanded ? "-rotate-90" : "rotate-180"
-        }`}
-      />
-    </button>
-  );
-
-
-
-  const SearchModeList = ({ compact }: { compact?: boolean }) => (
-    <motion.div
-      initial={{ opacity: 0, height: 0 }}
-      animate={{ opacity: 1, height: "auto" }}
-      exit={{ opacity: 0, height: 0 }}
-      transition={{ duration: 0.18, ease: [0.32, 0.72, 0, 1] }}
-      className="overflow-hidden"
-    >
-      <div
-        className="flex flex-col gap-0.5 rounded-[12px] my-1 p-1"
-        style={{ background: "hsl(var(--foreground) / 0.045)" }}
-      >
-        {WEB_SEARCH_MODES.map((opt) => {
-          const selected = searchMode === opt.id;
-          return (
-            <button
-              key={opt.id}
-              type="button"
-              onClick={() => setSearchMode(opt.id)}
-              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-[10px] text-start hover:bg-foreground/[0.06] transition-colors"
-            >
-              <span className="flex-1 min-w-0 flex flex-col gap-0.5">
-                <span className="text-[13px] font-medium text-foreground leading-none">{opt.label}</span>
-                {!compact && (
-                  <span className="text-[11px] leading-tight text-muted-foreground truncate">{opt.desc}</span>
-                )}
-              </span>
-              {selected && <Check className="w-[15px] h-[15px] text-primary shrink-0" strokeWidth={2.4} />}
-            </button>
-          );
-        })}
-      </div>
-    </motion.div>
-  );
 
   return (
     <motion.div key="main" {...fadeProps(-8)} className="flex flex-col">
-      {/* MOBILE — bottom sheet */}
-       <div dir={isArabic ? "rtl" : "ltr"} className="md:hidden flex flex-col" style={{ fontFamily: mobileFont }}>
-        <style>{`
-           .plus-action-tile { transition: transform 160ms cubic-bezier(0.32,0.72,0,1), background-color 160ms ease; }
-           .plus-action-tile:active { transform: scale(0.975); background-color: hsl(var(--muted) / 0.72); }
-           .plus-skill-row { transition: transform 160ms cubic-bezier(0.32,0.72,0,1), background-color 160ms ease; }
-           .plus-skill-row:active { transform: scale(0.985); background-color: hsl(var(--muted) / 0.62); }
-        `}</style>
-
-         <div className="flex flex-col gap-1.5 px-1">
-           <div className="grid grid-cols-2 gap-2">
-           {quickTiles.map((t) => (
+      <div
+        dir={isArabic ? "rtl" : "ltr"}
+        className="flex flex-col gap-0.5 px-1 py-1"
+        style={{ fontFamily: mobileFont }}
+      >
+        {items.map((item) => (
+          <div key={item.id} className="flex flex-col">
             <button
-              key={t.id}
               data-no-neo
               type="button"
-              onClick={t.onClick}
-              aria-label={t.label}
-               className="plus-action-tile flex min-h-[72px] w-full items-center gap-2.5 rounded-[14px] bg-muted/45 px-3 py-2.5 text-start outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              onClick={item.onClick}
+              className="plus-row flex h-11 w-full items-center gap-3 rounded-[12px] border-0 bg-transparent px-2.5 text-start transition-colors hover:bg-foreground/[0.055] active:bg-foreground/[0.09]"
             >
-              <span
-                 className="grid h-8 w-8 shrink-0 place-items-center rounded-[10px] bg-background/80 text-foreground"
-              >
-                 <t.Icon className="h-[17px] w-[17px]" strokeWidth={1.8} />
+              <item.Icon
+                className="h-[19px] w-[19px] shrink-0 text-foreground/80"
+                strokeWidth={1.8}
+              />
+              <span className="min-w-0 flex-1 truncate text-[15px] font-normal text-foreground">
+                {item.label}
               </span>
-               <span className="text-[14px] font-medium leading-none text-foreground">
-                {t.label}
-              </span>
+              {item.value && (
+                <span className="shrink-0 text-[13px] text-muted-foreground">
+                  {item.value}
+                </span>
+              )}
+              {item.expanded !== undefined && (
+                <ChevronLeft
+                  className={`h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform duration-200 ${
+                    item.expanded ? "-rotate-90" : isArabic ? "" : "rotate-180"
+                  }`}
+                  strokeWidth={1.8}
+                />
+              )}
             </button>
-          ))}
-           </div>
-
-           {rows.map((item) => (
-             <button
-               key={item.id}
-               data-no-neo
-               type="button"
-               onClick={item.onClick}
-               className="plus-skill-row flex min-h-[58px] w-full items-center gap-2.5 rounded-[14px] bg-transparent px-2.5 py-2 text-start outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-             >
-               <span className="grid h-8 w-8 shrink-0 place-items-center rounded-[10px] bg-muted/55 text-foreground">
-                 <item.Icon className="h-[17px] w-[17px]" strokeWidth={1.8} />
-               </span>
-               <span className="min-w-0 flex-1">
-                 <span className="block text-[14px] font-medium leading-4 text-foreground">{item.label}</span>
-                  <span className="mt-0.5 block break-words text-[11px] leading-4 text-muted-foreground">{item.desc}</span>
-               </span>
-               <ChevronLeft
-                 className={`h-4 w-4 shrink-0 text-muted-foreground/55 ${isArabic ? "" : "rotate-180"}`}
-                 strokeWidth={1.8}
-               />
-             </button>
-           ))}
-        </div>
-      </div>
-
-
-
-
-
-
-
-
-
-
-      {/* DESKTOP */}
-      <div className="hidden md:flex flex-col gap-1 py-1">
-        {[
-          {
-            icon: Image,
-            label: "Images",
-            desc: "Attach photos from your device",
-            onClick: () => {
-              p.imageInputRef.current?.click();
-              p.setPlusMenuOpen(false);
-            },
-          },
-          {
-            icon: FileUp,
-            label: "Files",
-            desc: "PDF, docs, sheets and more",
-            onClick: () => {
-              p.fileInputRef.current?.click();
-              p.setPlusMenuOpen(false);
-            },
-          },
-          {
-            icon: Blocks,
-            label: "Skills",
-            desc: "Enable extra abilities",
-            onClick: () => {
-              p.setPlusView("skills");
-            },
-          },
-          {
-            icon: Plug,
-            label: "Integrations",
-            desc: "Connect your apps",
-            onClick: () => {
-              p.setPlusMenuOpen(false);
-              window.dispatchEvent(new CustomEvent("megsy:open-integrations"));
-            },
-          },
-        ].map(({ icon: Icon, label, desc, onClick }) => (
-          <button
-            key={label}
-            onClick={onClick}
-            className="group w-full flex items-center gap-3 px-2 py-2 rounded-[14px] text-start transition-colors hover:bg-foreground/[0.05]"
-          >
-            <span
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-foreground/80 transition-colors group-hover:text-foreground"
-              style={{ background: "hsl(var(--foreground) / 0.055)" }}
-            >
-              <Icon className="h-[17px] w-[17px]" strokeWidth={1.8} />
-            </span>
-            <span className="flex-1 min-w-0 flex flex-col gap-0.5">
-              <span className="truncate text-[13.5px] font-medium leading-none text-foreground">{label}</span>
-              <span className="truncate text-[11.5px] leading-tight text-muted-foreground">{desc}</span>
-            </span>
-          </button>
+            <AnimatePresence initial={false}>
+              {item.id === "search" && searchOpen ? <SearchModeList compact /> : null}
+            </AnimatePresence>
+          </div>
         ))}
       </div>
-
     </motion.div>
   );
+
+  function SearchModeList({ compact }: { compact?: boolean }) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: "auto" }}
+        exit={{ opacity: 0, height: 0 }}
+        transition={{ duration: 0.18, ease: [0.32, 0.72, 0, 1] }}
+        className="overflow-hidden"
+      >
+        <div className="mx-2.5 my-1 flex flex-col gap-0.5">
+          {WEB_SEARCH_MODES.map((opt) => {
+            const selected = searchMode === opt.id;
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => setSearchMode(opt.id)}
+                className="flex w-full items-center gap-2.5 rounded-[10px] px-2.5 py-2 text-start transition-colors hover:bg-foreground/[0.055]"
+              >
+                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <span className="text-[13.5px] leading-none text-foreground">
+                    {opt.label}
+                  </span>
+                  {!compact && (
+                    <span className="truncate text-[11px] leading-tight text-muted-foreground">
+                      {opt.desc}
+                    </span>
+                  )}
+                </span>
+                {selected && (
+                  <Check className="h-[15px] w-[15px] shrink-0 text-primary" strokeWidth={2.4} />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </motion.div>
+    );
+  }
 };
 
 const PlusModels = (p: PlusContentProps) => (
