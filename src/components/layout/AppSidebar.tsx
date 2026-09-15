@@ -813,14 +813,19 @@ const AppSidebar = ({
               ) : (
                 <>
                 {conversations.length > 5 && (
-                  <div className="sticky top-0 z-10 -mx-2 mb-2 bg-[hsl(var(--sidebar-background,var(--background)))]/95 px-2 pb-2 pt-1 backdrop-blur-sm">
+                  <div className="sticky top-0 z-10 -mx-2 mb-1 flex items-center gap-2 px-2 pb-2 pt-1 backdrop-blur-sm">
+                    <Search
+                      className="h-[15px] w-[15px] shrink-0 text-muted-foreground/60"
+                      strokeWidth={1.75}
+                      aria-hidden
+                    />
                     <input
                       type="search"
                       value={convQuery}
                       onChange={(e) => setConvQuery(e.target.value)}
                       placeholder="Search chats"
                       aria-label="Search chats"
-                      className="h-9 w-full rounded-lg border border-border/60 bg-muted/40 px-3 text-[13px] text-foreground placeholder:text-muted-foreground/70 focus:border-border focus:outline-none"
+                      className="h-8 w-full border-0 bg-transparent p-0 text-[13px] text-foreground shadow-none placeholder:text-muted-foreground/60 focus:outline-none focus-visible:outline-none [&::-webkit-search-cancel-button]:hidden"
                     />
                   </div>
                 )}
