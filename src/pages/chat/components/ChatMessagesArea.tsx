@@ -86,6 +86,10 @@ export const ChatMessagesArea = forwardRef<HTMLDivElement, ChatMessagesAreaProps
     const isEmpty = !loadingMessages && messages.length === 0;
     return (
       <div
+        // `overflow-anchor: none` — the thinking panel grows and is then swapped
+        // for the answer above the viewport bottom; browser scroll anchoring
+        // reacts to that by shifting the transcript upward mid-reply.
+        style={{ overflowAnchor: "none" }}
         className={`flex-1 min-h-0 relative z-[1] bg-transparent scrollbar-hide overscroll-contain touch-pan-y ${isEmpty ? "overflow-hidden" : "overflow-y-auto"}`}
         ref={messagesContainerRef}
         onScroll={handleScroll}
