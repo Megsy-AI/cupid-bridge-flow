@@ -45,6 +45,7 @@ const useAppChrome = () => {
     const root = document.getElementById("root");
     root?.removeAttribute("data-snapshot-preview");
     root?.removeAttribute("aria-busy");
+    root?.classList.add("app-booted");
   }, []);
 
   useEffect(() => {
@@ -68,7 +69,10 @@ const useAppChrome = () => {
       const original = history[method].bind(history);
       return ((...args: Parameters<History["pushState"]>) => {
         const result = original(...args);
-        window.dispatchEvent(new Event("megsy:navigation"));
+        // BrowserRouter may initialise its history during render. Notify the
+        // outer TanStack shell on the next microtask so React never receives a
+        // nested router update while the inner router is still rendering.
+        queueMicrotask(() => window.dispatchEvent(new Event("megsy:navigation")));
         return result;
       }) as History["pushState"];
     };
