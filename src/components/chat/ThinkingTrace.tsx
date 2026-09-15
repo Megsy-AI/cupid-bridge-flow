@@ -3,7 +3,6 @@ import {
   ArrowDownWideNarrow,
   BookOpen,
   Brain,
-  Check,
   CheckCircle2,
   ChevronDown,
   Clock,
