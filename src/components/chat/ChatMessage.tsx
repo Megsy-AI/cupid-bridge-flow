@@ -1331,7 +1331,7 @@ const ChatMessage = ({
                           e.stopPropagation();
                           setDesktopMenuOpen((v) => !v);
                         }}
-                        className="inline-flex items-center justify-center w-9 h-9 rounded-md bg-transparent text-muted-foreground border-0 shadow-none hover:bg-muted hover:text-foreground transition-colors"
+                        className="inline-flex items-center justify-center w-9 h-9 rounded-md bg-transparent text-muted-foreground/70 border-0 shadow-none hover:bg-transparent hover:text-foreground transition-colors"
                         title={label("More", "المزيد")}
                         aria-label={label("More", "المزيد")}
                       >
