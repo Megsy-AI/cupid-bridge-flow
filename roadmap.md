@@ -40,3 +40,5 @@
 - On mobile, Enter inserts a newline instead of sending; only the Send button sends.
 - The Learning mode chip needs horizontal scrolling in the mobile mode bar to be reachable.
 - MCP / Integrations and Files were not exercised end to end in this pass.
+- Chips (mode chips above the composer) look bad — restyle them properly.
+- No white screen / no loading screen: the site must appear instantly on first paint.

@@ -29,10 +29,11 @@ export default function AssistantMediaBlock({ msg, setMessages, setInput, setIsL
   const autoStartRef = useRef(false);
   const retryingRef = useRef<Set<number>>(new Set());
 
+  const generationKey =
+    msg.mediaPlan?.generationKey ||
+    `${msg.mediaPlan?.mode}:${msg.mediaPlan?.summary}:${msg.mediaPlan?.scenes.map((scene) => scene.prompt).join("|")}`;
+
   const startGeneration = useCallback(async () => {
-    const generationKey =
-      msg.mediaPlan?.generationKey ||
-      `${msg.mediaPlan?.mode}:${msg.mediaPlan?.summary}:${msg.mediaPlan?.scenes.map((scene) => scene.prompt).join("|")}`;
     if (activeMediaGenerations.has(generationKey)) return;
     activeMediaGenerations.add(generationKey);
     setIsLoading(true);
@@ -129,7 +130,7 @@ export default function AssistantMediaBlock({ msg, setMessages, setInput, setIsL
       // Generation spends credits server-side — refresh the header balance.
       window.dispatchEvent(new Event(CREDITS_CHANGED_EVENT));
     }
-  }, [msg.id, msg.mediaPlan, msg.mediaResults, matches, setMessages, setIsLoading, setIsThinking, targetKey]);
+  }, [generationKey, msg.id, msg.mediaPlan, msg.mediaResults, matches, setMessages, setIsLoading, setIsThinking, targetKey]);
 
   // Auto-start generation immediately without any confirmation/plan step.
   useEffect(() => {
@@ -140,6 +141,53 @@ export default function AssistantMediaBlock({ msg, setMessages, setInput, setIsL
     autoStartRef.current = true;
     void startGeneration();
   }, [msg.mediaPlan, msg.mediaStatus, startGeneration]);
+
+  /**
+   * A video render is stored as `running` in the database. If the tab was
+   * closed / reloaded mid-render nothing is polling it any more, so without
+   * this the card spins forever and the composer stays stuck in "generating"
+   * — the freeze that used to need a manual page reload. Surface it as a
+   * stopped scene with the normal per-scene retry instead.
+   */
+  useEffect(() => {
+    if (!msg.mediaPlan) return;
+    if (msg.mediaStatus !== "running") return;
+    if (activeMediaGenerations.has(generationKey)) return;
+    setIsLoading(false);
+    setIsThinking(false);
+    const stalled = (msg.mediaResults ?? []).map((r) =>
+      r.status === "running" || r.status === "pending"
+        ? {
+            ...r,
+            status: "error" as const,
+            progress: undefined,
+            taskEndsAt: null,
+            error: "Generation stopped when the page closed. Tap retry to run it again.",
+          }
+        : r,
+    );
+    setMessages((prev) =>
+      prev.map((mm) =>
+        matches(mm) ? { ...mm, mediaStatus: "cancelled", mediaResults: stalled } : mm,
+      ),
+    );
+    if (msg.id) {
+      void updateMessageMetadata(msg.id, { mediaStatus: "cancelled", mediaResults: stalled });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [generationKey, msg.id, msg.mediaStatus]);
+
+  // Leaving the page must not leave the composer locked in "generating".
+  // The in-flight lock itself is kept so a remount never double-charges a
+  // render that is still polling.
+  useEffect(
+    () => () => {
+      setIsLoading(false);
+      setIsThinking(false);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
 
   if (!msg.mediaPlan) return null;
 

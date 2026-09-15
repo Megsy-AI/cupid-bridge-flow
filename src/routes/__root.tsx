@@ -23,18 +23,23 @@ html, body { background-color: #f3f3f5; margin: 0; }
 html[data-theme="dark"] { color-scheme: dark; }
 html[data-theme="dark"], html[data-theme="dark"] body { background-color: #1c1c1c; }
 html[data-theme="dark"] #root { background-color: #1c1c1c; }
-html[data-theme="light"] #boot-mark { color: rgba(0,0,0,0.32); }
 #root[data-snapshot-preview="true"] { pointer-events: none; user-select: none; contain: paint; }
+/* First paint is a still picture of the app's own frame — a top bar and the
+   composer in place — instead of a pulsing word or a spinner, so opening
+   Megsy never reads as "loading". It is static on purpose: nothing animates,
+   nothing says wait, and it is replaced the instant React commits. */
 #boot-mark {
-  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
-  font: 500 15px/1 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.42);
-  animation: boot-pulse 1.6s ease-in-out infinite; pointer-events: none;
+  position: fixed; inset: 0; pointer-events: none;
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 14px 14px calc(18px + env(safe-area-inset-bottom));
+  --boot-ink: rgba(255,255,255,0.07);
 }
-@keyframes boot-pulse { 0%,100% { opacity: 0.35; } 50% { opacity: 0.85; } }
-@media (prefers-reduced-motion: reduce) { #boot-mark { animation: none; } }
-/* The boot word must disappear the moment real page content exists, otherwise
-   it stays pulsing over every screen for the whole session. */
+html[data-theme="light"] #boot-mark { --boot-ink: rgba(0,0,0,0.055); }
+#boot-mark i { display: block; background: var(--boot-ink); border-radius: 999px; }
+#boot-mark .bm-top { display: flex; align-items: center; gap: 10px; }
+#boot-mark .bm-top i:first-child { width: 30px; height: 30px; border-radius: 10px; }
+#boot-mark .bm-top i:last-child { width: 92px; height: 12px; }
+#boot-mark .bm-bar { height: 52px; border-radius: 26px; }
 #root.app-booted #boot-mark { display: none; }
 `;
 
@@ -377,7 +382,13 @@ function RootShell({ children }: { children: ReactNode }) {
           </defs>
         </svg>
         <div id="root">
-          <div id="boot-mark">Megsy</div>
+          <div id="boot-mark" aria-hidden="true">
+            <div className="bm-top">
+              <i />
+              <i />
+            </div>
+            <i className="bm-bar" />
+          </div>
           {children}
         </div>
         <script dangerouslySetInnerHTML={{ __html: SNAPSHOT_RESTORE_SCRIPT }} />
