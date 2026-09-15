@@ -53,6 +53,30 @@ export interface ThinkingTraceProps {
 const RTL_LANGS = new Set(["ar", "ar-eg", "fa", "he"]);
 
 /**
+ * Pick a real glyph for a trace step from what the step actually did. Kept
+ * deliberately small and conservative: when nothing matches we fall back to a
+ * quiet sparkles mark rather than guessing loudly.
+ */
+function stepGlyph(line: string): typeof Globe {
+  const t = line.toLowerCase();
+  if (/search|بحث|أبحث|ابحث/.test(t)) return Search;
+  if (/open|visit|navigat|فتح|يفتح|تصفح|browse/.test(t)) return Globe;
+  if (/click|tap|press|ضغط|يضغط|نقر/.test(t)) return MousePointerClick;
+  if (/type|typed|fill|enter(ed)?\b|كتب|يكتب|كتابة/.test(t)) return Keyboard;
+  if (/scroll|سكرول/.test(t)) return ArrowDownWideNarrow;
+  if (/read|extract|found|قراءة|يقرأ|استخرج/.test(t)) return BookOpen;
+  if (/save|download|upload|file|حفظ|ملف/.test(t)) return Save;
+  if (/code|exec|terminal|run\b|ran\b|برمج|كود|ينفذ/.test(t)) return Terminal;
+  if (/image|صورة|صور/.test(t)) return ImageIcon;
+  if (/video|فيديو/.test(t)) return Video;
+  if (/slide|عرض تقديمي|شرائح/.test(t)) return Layers;
+  if (/wait|انتظار|ينتظر/.test(t)) return Clock;
+  if (/finish|done|complete|انته|اكتمل|تم /.test(t)) return CheckCircle2;
+  if (/think|plan|تحليل|يفكر|أخطط|planning/.test(t)) return Brain;
+  return Sparkles;
+}
+
+/**
  * Icons are never guessed from the wording of a step. A tool icon appears only
  * for the step that is really running a known tool; every other step keeps a
  * neutral dot marker, so the timeline stays visually stable.
