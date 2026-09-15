@@ -27,6 +27,15 @@ const SEEDS: Seed[] = [
     free: true,
   },
   {
+    slug: "renderful-gpt-image-2-5",
+    name: "GPT Image 2.5",
+    provider: "openai",
+    credits: 7,
+    description: "Sharpest text and layout.",
+    badges: ["PRO", "NEW"],
+    multi: true,
+  },
+  {
     slug: "renderful-gpt-image-2",
     name: "GPT Image 2",
     provider: "openai",

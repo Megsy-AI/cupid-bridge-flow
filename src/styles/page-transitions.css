@@ -289,7 +289,7 @@ html[data-nav-pending="true"]::after {
 }
 
 /* Focus ring animates in instead of snapping. */
-:where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+:where(a, button, select, summary, [tabindex]):focus-visible {
   animation: ng-focus-in 160ms var(--ease-out-quint) both;
 }
 @keyframes ng-focus-in {
