@@ -135,7 +135,7 @@ export default function MobileAuthExtras(p: Props) {
   return (
     <div
       dir="ltr"
-      className="relative min-h-[100dvh] w-full overflow-hidden bg-[#02040c] text-foreground"
+      className="relative h-[100dvh] min-h-[100svh] w-full overflow-hidden bg-[#02040c] text-foreground"
       style={{ fontFamily: FONT_SANS, touchAction: "manipulation" }}
     >
       {/* Same hero clip as the sign-up screen */}
@@ -146,7 +146,8 @@ export default function MobileAuthExtras(p: Props) {
         playsInline
         preload="metadata"
         poster={AUTH_HERO_POSTER}
-        className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+        data-auth-hero-video
+        className="pointer-events-none absolute inset-0 block h-full min-h-full w-full min-w-full max-w-none object-cover"
         style={{ objectPosition: "center 48%", zIndex: 0 }}
       >
         <source src={AUTH_HERO_MP4} type="video/mp4" />

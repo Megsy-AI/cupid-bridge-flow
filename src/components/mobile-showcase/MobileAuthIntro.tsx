@@ -96,7 +96,7 @@ export default function MobileAuthIntro({
   return (
     <div
       dir={"ltr"}
-      className="relative min-h-[100dvh] w-full overflow-hidden bg-[#02040c] text-foreground"
+      className="relative h-[100dvh] min-h-[100svh] w-full overflow-hidden bg-[#02040c] text-foreground"
       style={{ fontFamily: 'Inter, -apple-system, "SF Pro Text", system-ui, sans-serif', touchAction: "manipulation" }}
     >
       {/* Hero video — poster paints instantly, clip streams in behind it */}
@@ -108,7 +108,8 @@ export default function MobileAuthIntro({
           playsInline
           preload="metadata"
           poster={AUTH_HERO_POSTER}
-          className="absolute inset-0 h-full w-full object-cover"
+          data-auth-hero-video
+          className="absolute inset-0 block h-full min-h-full w-full min-w-full max-w-none object-cover"
           style={{ objectPosition: "center 45%" }}
 
         >
@@ -133,13 +134,13 @@ export default function MobileAuthIntro({
       >
         {/* Title */}
         <h1
-          className="text-left text-foreground"
+          className="max-w-full break-words text-left text-foreground"
           style={{
             fontFamily: '"Inter", sans-serif',
             fontWeight: 900,
-            fontSize: "52px",
-            lineHeight: "0.88",
-            letterSpacing: "-0.06em",
+            fontSize: "clamp(40px, 12vw, 52px)",
+            lineHeight: "0.94",
+            letterSpacing: "0",
             textShadow: "0 1px 3px rgba(0,0,0,.55)",
           }}
         >

@@ -243,7 +243,7 @@ const CodePreviewModal = ({ code, lang, onClose, files, initialPath }: CodePrevi
 
       <div className="flex-1 flex min-h-0" dir="ltr">
         {hasProject && (
-          <aside className="w-56 shrink-0 border-r border-border/40 bg-muted/20 overflow-y-auto">
+          <aside className="hidden w-56 shrink-0 overflow-y-auto border-r border-border/40 bg-muted/20 md:block">
             <div className="px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border/40">
               Project files
             </div>

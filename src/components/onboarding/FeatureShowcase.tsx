@@ -210,8 +210,8 @@ function IntroScreen({
   eager: boolean;
 }) {
   return (
-    <div className="mx-auto flex h-full w-full max-w-md flex-col pb-36 sm:max-w-lg">
-      <div className="relative h-[68dvh] min-h-[420px] max-h-[680px] w-full overflow-hidden">
+    <div className="mx-auto flex h-full min-h-0 w-full max-w-md flex-col pb-36 sm:max-w-lg">
+      <div className="relative min-h-[260px] w-full flex-1 overflow-hidden sm:min-h-[340px]">
         <img
           src={screen.image}
           alt={screen.alt}
@@ -224,11 +224,11 @@ function IntroScreen({
         <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[hsl(var(--welcome-paper))] to-transparent" />
       </div>
 
-      <div className="relative z-10 px-7 pt-5 text-left">
-        <h2 className="max-w-[330px] text-[38px] font-extrabold leading-[1.03] text-[hsl(var(--welcome-ink))] sm:text-[42px]">
+      <div className="relative z-10 shrink-0 px-7 pt-4 text-left">
+        <h2 className="max-w-[330px] break-words text-[34px] font-extrabold leading-[1.08] text-[hsl(var(--welcome-ink))] sm:text-[42px]">
           {screen.title}
         </h2>
-        <p className="mt-4 max-w-[330px] text-[16px] font-medium leading-6 text-[hsl(var(--welcome-muted))]">
+        <p className="mt-3 max-w-[330px] break-words text-[15px] font-medium leading-[1.45] text-[hsl(var(--welcome-muted))] sm:text-[16px]">
           {screen.description}
         </p>
       </div>
@@ -238,8 +238,8 @@ function IntroScreen({
 
 function ProScreen() {
   return (
-    <div className="mx-auto flex h-full w-full max-w-md flex-col pb-36 sm:max-w-lg">
-      <div className="relative h-[68dvh] min-h-[420px] max-h-[680px] w-full overflow-hidden">
+    <div className="mx-auto flex h-full min-h-0 w-full max-w-md flex-col pb-36 sm:max-w-lg">
+      <div className="relative min-h-[260px] w-full flex-1 overflow-hidden sm:min-h-[340px]">
         <img
           src={welcomePro}
           alt="Woman holding a Megsy Pro card toward the camera"

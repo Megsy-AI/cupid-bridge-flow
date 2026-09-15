@@ -111,7 +111,11 @@ export function CleanChoice<T extends string>({
   onChange: (v: T) => void;
   columns?: 2 | 3 | 4;
 }) {
-  const cols = { 2: "grid-cols-2", 3: "grid-cols-3", 4: "grid-cols-4" }[columns];
+  const cols = {
+    2: "grid-cols-1 min-[360px]:grid-cols-2",
+    3: "grid-cols-1 min-[360px]:grid-cols-2 md:grid-cols-3",
+    4: "grid-cols-1 min-[360px]:grid-cols-2 md:grid-cols-4",
+  }[columns];
   return (
     <div className={cn("grid gap-2", cols)}>
       {options.map((opt) => {
@@ -227,9 +231,9 @@ export function CleanRow({
         </span>
       )}
       <div className="flex-1 min-w-0">
-        <p className="text-[13.5px] font-semibold text-foreground truncate">{label}</p>
+        <p className="break-words text-[13.5px] font-semibold leading-snug text-foreground">{label}</p>
         {description && (
-          <p className="text-[12px] text-muted-foreground mt-0.5 truncate">{description}</p>
+          <p className="mt-0.5 break-words text-[12px] leading-snug text-muted-foreground">{description}</p>
         )}
       </div>
       {trailing && <div className="shrink-0">{trailing}</div>}

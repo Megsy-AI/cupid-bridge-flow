@@ -435,7 +435,7 @@ const AnimatedInput = ({
                 data-bwignore="true"
                 data-form-type="other"
                 name="chat-message"
-                className="scrollbar-hide relative w-full bg-transparent border-none outline-none resize-none text-[15.5px] md:text-sm text-foreground !text-foreground py-1.5 px-1 leading-relaxed md:py-2 font-medium transition-[min-height] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                className="scrollbar-hide relative w-full resize-none border-none bg-transparent px-1 py-1.5 text-[15.5px] font-medium leading-relaxed text-foreground outline-none ring-0 focus:outline-none focus-visible:outline-none focus-visible:ring-0 md:py-2 md:text-sm transition-[min-height] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
                 style={{ minHeight: headerSlot ? "34px" : "38px" }}
               />
             </div>

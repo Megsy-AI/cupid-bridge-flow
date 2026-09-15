@@ -338,7 +338,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" dir="ltr" className="dark" translate="no">
+    <html lang="en" dir="ltr" className="dark" translate="no" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
         <style dangerouslySetInnerHTML={{ __html: BOOT_STYLE }} />
@@ -382,13 +382,5 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 function RootComponent() {
-  // Once React is mounted the boot word has done its job; leaving it in place
-  // kept a pulsing "MEGSY" centred over every page for the entire session.
-  useEffect(() => {
-    document.getElementById("root")?.classList.add("app-booted");
-    return () => {
-      document.getElementById("root")?.classList.remove("app-booted");
-    };
-  }, []);
   return <Outlet />;
 }
