@@ -3,6 +3,7 @@ import { getAnonFingerprint } from "@/lib/anonFingerprint";
 import { isFastLaneEligible, tryFastChat } from "@/lib/chat/fastChat";
 import { readChatModelPreferences } from "@/lib/chatModelPreferences";
 import { edgeAnonKey, edgeUrl } from "@/lib/edgeRuntime";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/edgeRuntime";
 
 /**
  * Provider keys live server-side in the deployed Supabase functions, so both
@@ -92,7 +93,7 @@ async function getAccessToken(): Promise<string> {
   } catch {
     /* ignore */
   }
-  return import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  return SUPABASE_ANON_KEY;
 }
 
 async function refreshAccessToken(): Promise<string> {
@@ -111,7 +112,7 @@ async function refreshAccessToken(): Promise<string> {
     /* fall back to the publishable key for guest chat */
   }
   _cachedToken = null;
-  return import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  return SUPABASE_ANON_KEY;
 }
 
 export async function streamChat({

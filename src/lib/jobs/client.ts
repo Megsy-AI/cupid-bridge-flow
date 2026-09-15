@@ -3,6 +3,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { DEFAULT_MODEL } from "@/lib/defaultModel";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/edgeRuntime";
 
 export type JobKind =
   | "chat"
@@ -71,7 +72,7 @@ export interface JobHandlers {
   onStale?: (row: JobRow) => void;
 }
 
-const FN_BASE = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
+const FN_BASE = `${SUPABASE_URL}/functions/v1`;
 
 /**
  * Fetch with automatic retry on transient edge-runtime cold-start errors
@@ -154,7 +155,7 @@ export async function startJob(kind: JobKind, payload: any): Promise<{ jobId: st
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      apikey: SUPABASE_ANON_KEY,
       Authorization: `Bearer ${token}`,
       "Idempotency-Key": idempotencyKey,
       "X-Idempotency-Key": idempotencyKey,
@@ -190,7 +191,7 @@ export async function startPlusAIPresentation(payload: {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      apikey: SUPABASE_ANON_KEY,
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({

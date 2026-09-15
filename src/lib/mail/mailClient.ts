@@ -1,5 +1,6 @@
 /** @doc Client for the Megsy internal mail system (username@megsyai.com). */
 import { supabase } from "@/integrations/supabase/client";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/edgeRuntime";
 
 export const MAIL_DOMAIN = "megsyai.com";
 
@@ -38,12 +39,12 @@ async function invokeMail<T>(body: Record<string, unknown>): Promise<T> {
   const { data: sess } = await supabase.auth.getSession();
   const token = sess.session?.access_token;
   if (!token) throw new Error("not authenticated");
-  const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/mail`, {
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/mail`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
-      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string,
+      apikey: SUPABASE_ANON_KEY as string,
     },
     body: JSON.stringify(body),
   });
@@ -66,12 +67,12 @@ export async function pollInbox(): Promise<{ stored: number; skipped: number } |
     const { data: sess } = await supabase.auth.getSession();
     const token = sess.session?.access_token;
     if (!token) return null;
-    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/mail-poll`, {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/mail-poll`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
-        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string,
+        apikey: SUPABASE_ANON_KEY as string,
       },
       body: JSON.stringify({}),
     });

@@ -11,6 +11,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import type { ProjectFile } from "@/lib/extractProjectFiles";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/edgeRuntime";
 
 export const IMAGE_CREDITS = 2;
 export const VIDEO_CREDITS = 12;
@@ -90,7 +91,7 @@ export function estimateAssetCredits(reqs: Array<{ kind: CoderAssetKind }>): num
 
 async function authHeaders() {
   const { data: { session } } = await supabase.auth.getSession();
-  const anon = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+  const anon = SUPABASE_ANON_KEY as string;
   return {
     "Content-Type": "application/json",
     apikey: anon,
@@ -99,7 +100,7 @@ async function authHeaders() {
 }
 
 function fnUrl(name: string) {
-  return `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${name}`;
+  return `${SUPABASE_URL}/functions/v1/${name}`;
 }
 
 /** Generate a single image and return a hosted, publicly reachable URL. */

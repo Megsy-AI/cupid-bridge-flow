@@ -3,8 +3,9 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { DEFAULT_MODEL } from "@/lib/defaultModel";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/edgeRuntime";
 
-const CHAT_EDGE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-alibaba`;
+const CHAT_EDGE_URL = `${SUPABASE_URL}/functions/v1/chat-alibaba`;
 
 const EDIT_PATTERNS =
   /(عدّل|عدل|تعديل|غيّر|غير|بدّل|بدل|خلي|اجعل|احذف|امسح|شيل|ضيف|أضف|زوّد|نفس الصورة|الصوره دي|الصورة دي|هذه الصورة|نفس الشخصية|edit|change|modify|adjust|remove|erase|replace|make it|same image|this image|tweak|retouch)/i;
@@ -19,7 +20,7 @@ export function detectImageEditIntent(text: string): boolean {
 
 async function accessToken(): Promise<string> {
   const { data } = await supabase.auth.getSession();
-  return data.session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  return data.session?.access_token || SUPABASE_ANON_KEY;
 }
 
 const SYSTEM_ENHANCE = `You are an internal image-prompt engineer. Rewrite the user's request into ONE rich, concrete English image prompt.
@@ -54,7 +55,7 @@ export async function enhanceImagePrompt(args: {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        apikey: SUPABASE_ANON_KEY,
         Authorization: `Bearer ${token}`,
       },
       signal: args.signal,

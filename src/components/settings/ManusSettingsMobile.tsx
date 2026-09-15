@@ -95,7 +95,8 @@ const ManusSettingsMobile = () => {
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => getStoredTheme());
 
   const mainRows: Row[] = [
-    { icon: MailIcon, label: "Mail", trailing: "@megsyai.com", path: "/mail" },
+    // Mail is hidden until its UI is reworked.
+    // { icon: MailIcon, label: "Mail", trailing: "@megsyai.com", path: "/mail" },
     { icon: KeyRound, label: "Passwords", path: "/settings/passwords" },
     { icon: Lightbulb, label: "Knowledge", path: "/settings/memory" },
     { icon: Bell, label: "Notifications", path: "/notifications" },

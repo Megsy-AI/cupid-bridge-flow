@@ -36,13 +36,20 @@ import {
   getPlan,
   type PlanTier,
 } from "@/data/pricingData";
-import { markCheckoutOpened, hasAbandonedCheckout, INTRO_PRICE } from "@/lib/pricingOffers";
+import {
+  markCheckoutOpened,
+  hasAbandonedCheckout,
+  INTRO_PRICE,
+  TRIAL_PRICE,
+  TRIAL_DAYS,
+} from "@/lib/pricingOffers";
 import { dodoProductId } from "@/lib/dodoCatalog";
 
 import { brandText, getZoneBrand } from "@/lib/zoneBrand";
 import { isEgMode } from "@/lib/egMode";
 import { isArabBilling } from "@/lib/payRegion";
 import { translateExactText, useUserLang } from "@/lib/authI18n";
+import { detectLocalMoney, formatLocalPrice } from "@/lib/localCurrency";
 
 const LandingFooter = lazy(() => import("@/components/landing/LandingFooter"));
 const PaymentGatewaySheet = lazy(() => import("@/components/billing/PaymentGatewaySheet"));
@@ -201,6 +208,12 @@ const PricingPage = () => {
   const promo = usePromoCountdown();
   const lang = useUserLang();
   const isAr = typeof lang === "string" && lang.toLowerCase().startsWith("ar");
+  // Local-currency hint beside the USD price, resolved from the device only
+  // (timezone/locale) and read after mount so SSR markup stays stable.
+  const [localMoney, setLocalMoney] = useState<ReturnType<typeof detectLocalMoney>>(null);
+  useEffect(() => {
+    setLocalMoney(detectLocalMoney());
+  }, []);
   const [sidebarCollapsed] = useSidebarCollapsed();
   const PLANS = brandText(RAW_PLANS);
   const FAQS = brandText(RAW_FAQS);
@@ -747,7 +760,7 @@ const PricingPage = () => {
                           {"Limited Launch Offer"}
                         </span>
                         <p className="text-[13px] text-foreground/90 leading-relaxed max-w-[16rem] sm:max-w-[18rem]">
-                          {`Pro first month $${INTRO_PRICE} — then $20/month`}
+                          {`Pro ${TRIAL_DAYS} days for $${TRIAL_PRICE} — renews at $${INTRO_PRICE} for your first month, then $20/month`}
                         </p>
                       </div>
                       <div
@@ -898,6 +911,10 @@ const PricingPage = () => {
                     const curIdx = order.indexOf(cur);
                     const thisIdx = order.indexOf(p.tier);
                     const isCurrent = curIdx === thisIdx;
+                    // Monthly Pro leads with the $1 / 3-day trial: it renews into the
+                    // $7 intro month automatically, so the intro price is the follow-up,
+                    // not the headline.
+                    const showTrialOffer = p.tier === "pro" && !isYearly && !isCurrent;
                     const isLower = thisIdx < curIdx;
                     const ctaLabel = isCurrent
                       ? "Current plan"
@@ -925,36 +942,69 @@ const PricingPage = () => {
                           <div className="flex items-baseline gap-1.5">
                             <span className="font-garamond text-2xl text-foreground">$</span>
                             <CountUp
-                              value={price}
+                              value={showTrialOffer ? TRIAL_PRICE : price}
                               className="font-garamond text-6xl leading-none text-foreground tabular-nums"
                             />
                             <span
                               className="text-foreground text-xs ml-1 uppercase"
                               style={{ letterSpacing: "0.2em" }}
                             >
-                              /{isProFirstMonth ? "1st mo" : isYearly ? "year" : "month"}
+                              /
+                              {showTrialOffer
+                                ? "3 days"
+                                : isProFirstMonth
+                                  ? "1st mo"
+                                  : isYearly
+                                    ? "year"
+                                    : "month"}
                             </span>
                           </div>
 
                           <div className="flex items-center gap-2 mt-3">
                             <span className="text-xs text-foreground/85 line-through tabular-nums">
-                              $<CountUp value={strikePrice} />
+                              $<CountUp value={showTrialOffer ? INTRO_PRICE : strikePrice} />
                             </span>
                             <span
                               className="text-[10px] uppercase px-2 py-0.5 rounded-full border border-foreground/40 text-foreground font-light"
                               style={{ letterSpacing: "0.18em" }}
                             >
-                              {discountLabel}
+                              {showTrialOffer ? "3-day trial" : discountLabel}
                             </span>
                           </div>
 
-                          {isProFirstMonth && (
+                          {localMoney
+                            ? (() => {
+                                const local = formatLocalPrice(
+                                  showTrialOffer ? TRIAL_PRICE : price,
+                                  localMoney,
+                                );
+                                return local ? (
+                                  <p className="text-[11px] text-foreground/70 mt-2 tabular-nums font-light">
+                                    {local}
+                                  </p>
+                                ) : null;
+                              })()
+                            : null}
+
+
+
+                          {showTrialOffer ? (
                             <p
                               className="text-[10px] uppercase text-foreground/70 mt-2 font-light"
                               style={{ letterSpacing: "0.18em" }}
                             >
-                              Then ${rawPrice}/month
+                              Renews automatically at ${INTRO_PRICE} for your first month, then $
+                              {rawPrice}/month
                             </p>
+                          ) : (
+                            isProFirstMonth && (
+                              <p
+                                className="text-[10px] uppercase text-foreground/70 mt-2 font-light"
+                                style={{ letterSpacing: "0.18em" }}
+                              >
+                                Then ${rawPrice}/month
+                              </p>
+                            )
                           )}
 
                           {/* Yearly maths spelled out so the offer never looks contradictory:
@@ -989,36 +1039,40 @@ const PricingPage = () => {
                           {p.tier !== "starter" && (
                             <button
                               type="button"
-                              onClick={() => handleSubscribe(p.tier)}
+                              onClick={() =>
+                                showTrialOffer
+                                  ? handleSubscribe("pro", { trial: true, interval: "monthly" })
+                                  : handleSubscribe(p.tier)
+                              }
                               disabled={loadingTier !== null || isCurrent}
                               className={`liquid-glass w-full py-3.5 rounded-full text-xs uppercase font-normal text-foreground disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2 ${isElite ? "bg-foreground/[0.04]" : ""}`}
                               style={{ letterSpacing: "0.2em" }}
                             >
                               {loadingTier === p.tier ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : showTrialOffer ? (
+                                `Start ${TRIAL_DAYS} days for $${TRIAL_PRICE}`
                               ) : (
                                 ctaLabel
                               )}
                             </button>
                           )}
 
-                          {p.tier === "pro" && !isCurrent && (
+                          {showTrialOffer && (
                             <>
                               <button
                                 type="button"
-                                onClick={() =>
-                                  handleSubscribe("pro", { trial: true, interval: "monthly" })
-                                }
+                                onClick={() => handleSubscribe(p.tier)}
                                 disabled={loadingTier !== null}
                                 className="mt-3 w-full py-3 rounded-full border border-foreground/40 text-[11px] uppercase font-normal text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                                 style={{ letterSpacing: "0.18em" }}
                               >
-                                Start 3 days for $1
+                                {`Skip the trial — $${INTRO_PRICE} first month`}
                               </button>
                               <p className="text-[10px] text-foreground/75 mt-2 leading-relaxed">
-                                Trial: 3 premium images per day. After the trial it continues at $
-                                {INTRO_PRICE}/first month, then ${p.monthlyPrice}/month with
-                                unlimited images. Cancel anytime.
+                                Trial: 3 premium images per day. It renews automatically after{" "}
+                                {TRIAL_DAYS} days at ${INTRO_PRICE} for your first month, then $
+                                {p.monthlyPrice}/month with unlimited images. Cancel anytime.
                               </p>
                             </>
                           )}

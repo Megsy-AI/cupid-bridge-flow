@@ -141,7 +141,8 @@ export const AppRoutes = ({ currentUserId }: { currentUserId: string | null }) =
     <Route path="/notifications" element={<ProtectedRoute><NotificationsInboxPage /></ProtectedRoute>} />
     <Route path="/settings/security" element={<ProtectedRoute><SecuritySettingsPage /></ProtectedRoute>} />
     <Route path="/settings/language" element={<ProtectedRoute><LanguagePage /></ProtectedRoute>} />
-    <Route path="/settings/mail" element={<Navigate to="/mail" replace />} />
+    {/* Mail is hidden until its UI is reworked — both entries land on chat. */}
+    <Route path="/settings/mail" element={<Navigate to="/chat" replace />} />
     <Route path="/settings/passwords" element={<ProtectedRoute><PasswordsPage /></ProtectedRoute>} />
     <Route path="/settings/mcp" element={<ProtectedRoute><McpSettingsPage /></ProtectedRoute>} />
     <Route path="/mcp-callback" element={<ProtectedRoute><McpCallbackPage /></ProtectedRoute>} />
@@ -270,7 +271,9 @@ export const AppRoutes = ({ currentUserId }: { currentUserId: string | null }) =
     <Route path="/referrals/resources" element={<ProtectedRoute><ReferralResourcesPage /></ProtectedRoute>} />
     {/* Sidebar destinations shared as short links must resolve, not 404. */}
     <Route path="/earn" element={<Navigate to="/referrals" replace />} />
-    <Route path="/mail" element={<ProtectedRoute><MailPage /></ProtectedRoute>} />
+    {/* Mail page is hidden until reworked; keep the import wired for the restore. */}
+    <Route path="/mail" element={<Navigate to="/chat" replace />} />
+    <Route path="/mail/*" element={<Navigate to="/chat" replace />} />
     <Route path="/settings/general" element={<Navigate to="/settings" replace />} />
 
     <Route path="/integrations" element={<Navigate to="/chat?integrations=1" replace />} />

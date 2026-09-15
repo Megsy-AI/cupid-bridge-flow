@@ -3,6 +3,7 @@ import { getCachedUser } from "@/lib/cachedUser";
 import { getActiveWorkspaceId } from "@/lib/activeWorkspace";
 import { type ChatMode } from "../chatConstants";
 import { DEFAULT_MODEL } from "@/lib/defaultModel";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/edgeRuntime";
 
 /**
  * Asks the lightweight chat-alibaba edge function to compress the user's first
@@ -15,9 +16,9 @@ export async function generateShortTitle(
   setConversationTitle: (t: string) => void,
 ): Promise<void> {
   try {
-    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-alibaba`;
+    const url = `${SUPABASE_URL}/functions/v1/chat-alibaba`;
     const { data: sess } = await supabase.auth.getSession();
-    const token = sess.session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    const token = sess.session?.access_token || SUPABASE_ANON_KEY;
 
     // Detect Arabic so we can use an Arabic-native instruction — otherwise
     // the model sometimes answers the English "Summarize..." prompt with a
@@ -29,7 +30,7 @@ export async function generateShortTitle(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        apikey: SUPABASE_ANON_KEY,
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({

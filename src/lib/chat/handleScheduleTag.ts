@@ -3,6 +3,7 @@
  *  permission from the user. Returns the reply text with the tag stripped. */
 import { supabase } from "@/integrations/supabase/client";
 import { ensurePushSubscription } from "@/lib/push/subscribe";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/edgeRuntime";
 
 const TAG_RE = /<SCHEDULE\b([^/>]*)\/?\s*>/i;
 
@@ -30,13 +31,13 @@ export async function handleScheduleTag(text: string): Promise<string> {
       const token = data.session?.access_token;
       if (!token) return;
       await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-scheduled-message`,
+        `${SUPABASE_URL}/functions/v1/create-scheduled-message`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string,
+            apikey: SUPABASE_ANON_KEY as string,
           },
           body: JSON.stringify({
             prompt,
