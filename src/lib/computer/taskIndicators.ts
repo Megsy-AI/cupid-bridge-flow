@@ -8,11 +8,21 @@
  */
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { pollComputerTask } from "./client";
 
 export type TaskIndicator = "running" | "done";
 
 const RECENT_DONE_MS = 24 * 60 * 60 * 1000;
 const POLL_MS = 20_000;
+/**
+ * A row that still says `running` but has not been touched for this long is
+ * abandoned bookkeeping (tab closed mid-run, or a task that finished before the
+ * row was reconciled). Re-poll it once: the poll writes the real terminal state
+ * back, so the sidebar can never show a task as running forever.
+ */
+const STALE_RUNNING_MS = 10 * 60 * 1000;
+const reconciled = new Set<string>();
+
 
 export function useTaskIndicators(): Record<string, TaskIndicator> {
   const [map, setMap] = useState<Record<string, TaskIndicator>>({});
@@ -30,7 +40,7 @@ export function useTaskIndicators(): Record<string, TaskIndicator> {
         const since = new Date(Date.now() - RECENT_DONE_MS).toISOString();
         const { data } = await supabase
           .from("computer_tasks")
-          .select("conversation_id,status,updated_at")
+          .select("id,conversation_id,status,updated_at")
           .eq("user_id", user.id)
           .not("conversation_id", "is", null)
           .gte("updated_at", since)
@@ -43,9 +53,18 @@ export function useTaskIndicators(): Record<string, TaskIndicator> {
           if (!cid) continue;
           const status = String((row as { status?: string }).status || "");
           const running = status === "pending" || status === "running" || status === "paused";
-          if (running) next[cid] = "running";
-          else if (!next[cid]) next[cid] = "done";
+          if (running) {
+            const id = String((row as { id?: string }).id || "");
+            const touched = Date.parse(String((row as { updated_at?: string }).updated_at || "")) || 0;
+            if (id && touched && Date.now() - touched > STALE_RUNNING_MS && !reconciled.has(id)) {
+              reconciled.add(id);
+              void pollComputerTask(id).catch(() => reconciled.delete(id));
+              continue;
+            }
+            next[cid] = "running";
+          } else if (!next[cid]) next[cid] = "done";
         }
+
         setMap(next);
       } catch {
         /* the indicator is decorative — never break the sidebar */
