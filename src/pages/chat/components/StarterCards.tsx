@@ -32,18 +32,21 @@ const handleCardClick = (
   onPick("", (c as { mode?: string }).mode);
 };
 
+// Compact pills: sized to their label instead of a wide fixed block, so the
+// row reads as quiet shortcuts rather than four big buttons.
 const chipClass =
-  "group inline-flex h-11 min-w-[124px] items-center justify-center gap-2.5 rounded-2xl border border-border bg-card " +
-  "px-6 hover:bg-muted active:scale-[0.97] " +
+  "group inline-flex h-8 items-center justify-center gap-1.5 rounded-full border border-border bg-card " +
+  "px-3 hover:bg-muted active:scale-[0.97] " +
   "transition-[background-color,transform] duration-150";
 
 const iconClass =
-  "h-4 w-4 shrink-0 text-foreground/70 transition-colors group-hover:text-foreground";
+  "h-[14px] w-[14px] shrink-0 text-foreground/70 transition-colors group-hover:text-foreground";
 const labelClass =
-  "whitespace-nowrap text-[13px] font-medium text-foreground transition-colors";
+  "whitespace-nowrap text-[12.5px] font-medium text-foreground transition-colors";
 
 /** Desktop-only: compact icon chips shown below the composer (no images). */
 export function StarterChips({ onPick, className = "" }: StarterCardsProps) {
+  const isAr = useUserLang().startsWith("ar");
   return (
     <AnimatePresence initial={false}>
       <motion.div
@@ -62,7 +65,7 @@ export function StarterChips({ onPick, className = "" }: StarterCardsProps) {
             className={chipClass}
           >
             <c.Icon className={iconClass} strokeWidth={1.75} />
-            <span className={labelClass}>{c.title}</span>
+            <span className={labelClass}>{isAr ? c.titleAr : c.title}</span>
           </button>
         ))}
       </motion.div>
@@ -91,13 +94,13 @@ export function StarterCards({ onPick, className = "" }: StarterCardsProps) {
             type="button"
             onClick={() => handleCardClick(c, onPick)}
             className={
-              "group flex h-11 min-w-[116px] shrink-0 items-center justify-center gap-2.5 rounded-2xl " +
-              "border border-border bg-card px-5 " +
+              "group flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-full " +
+              "border border-border bg-card px-3 " +
               "hover:bg-muted active:scale-[0.97] transition-[background-color,transform] duration-150"
             }
           >
-            <c.Icon className="h-4 w-4 shrink-0 text-foreground/70 transition-colors group-hover:text-foreground" strokeWidth={1.75} />
-            <span className="whitespace-nowrap text-[13px] font-medium text-foreground transition-colors">
+            <c.Icon className="h-[14px] w-[14px] shrink-0 text-foreground/70 transition-colors group-hover:text-foreground" strokeWidth={1.75} />
+            <span className="whitespace-nowrap text-[12.5px] font-medium text-foreground transition-colors">
               {isAr ? c.titleAr : c.title}
             </span>
           </button>

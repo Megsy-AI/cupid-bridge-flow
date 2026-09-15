@@ -90,9 +90,9 @@ export default function MobileModeBar({ mode, onChange }: Props) {
               color: activeMode.color,
               boxShadow: `inset 0 0 0 1px ${tint(activeMode.color, 0.34)}`,
             }}
-            className="shrink-0 inline-flex items-center gap-1.5 h-9 ps-3.5 pe-1.5 rounded-full text-[13px] font-semibold"
+            className="shrink-0 inline-flex items-center gap-1.5 h-8 ps-3 pe-1 rounded-full text-[12.5px] font-semibold"
           >
-            <activeMode.Icon size={15} strokeWidth={2.2} />
+            <activeMode.Icon size={14} strokeWidth={2.2} />
             <span className="leading-none whitespace-nowrap">{tx(activeMode.label)}</span>
             <button
               type="button"
@@ -101,7 +101,7 @@ export default function MobileModeBar({ mode, onChange }: Props) {
                 haptic("soft");
                 onChange("normal");
               }}
-              className="inline-flex items-center justify-center w-6 h-6 rounded-full transition-opacity hover:opacity-70"
+              className="inline-flex items-center justify-center w-5 h-5 rounded-full transition-opacity hover:opacity-70"
               style={{ backgroundColor: tint(activeMode.color, 0.2) }}
             >
               <X size={13} strokeWidth={2.8} />
@@ -124,9 +124,9 @@ export default function MobileModeBar({ mode, onChange }: Props) {
               exit={{ opacity: 0, scale: 0.9, y: 4 }}
               transition={{ ...TAP_SPRING, delay: i * 0.02 }}
               style={{ scrollSnapAlign: "start" }}
-              className="shrink-0 inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full bg-foreground/[0.05] text-[13px] font-medium text-foreground/80 transition-colors hover:bg-foreground/[0.09] active:bg-foreground/[0.12]"
+              className="shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-foreground/[0.05] text-[12.5px] font-medium text-foreground/80 transition-colors hover:bg-foreground/[0.09] active:bg-foreground/[0.12]"
             >
-              <Icon size={15} strokeWidth={2.2} style={{ color }} />
+              <Icon size={14} strokeWidth={2.2} style={{ color }} />
               <span className="leading-none whitespace-nowrap">{tx(label)}</span>
             </motion.button>
           ))
