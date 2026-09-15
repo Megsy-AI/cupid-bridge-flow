@@ -1815,9 +1815,22 @@ const ChatPage = () => {
     let autoMediaModel: typeof mediaModel = null;
     if (chatMode === "normal" && text.trim()) {
       try {
-        const { detectMediaIntent, pickDefaultMediaModel } =
+        const { detectMediaIntent, detectImageEditIntent, pickDefaultMediaModel } =
           await import("@/lib/media/autoMediaIntent");
-        const intent = detectMediaIntent(text);
+        let intent = detectMediaIntent(text);
+        if (!intent) {
+          // A short follow-up like "now make the bicycle red" only means an edit
+          // when this conversation already produced an image; otherwise it stays
+          // a normal text turn.
+          const hasImage = messages.some((m: any) => {
+            const res = Array.isArray(m?.mediaResults) ? m.mediaResults : [];
+            return (
+              res.some((r: any) => r?.type === "image" && r?.url) ||
+              (Array.isArray(m?.images) && m.images.length > 0)
+            );
+          });
+          if (hasImage && detectImageEditIntent(text)) intent = "image";
+        }
         if (intent) {
           const picked =
             mediaModel && mediaModel.type === intent
@@ -1833,6 +1846,7 @@ const ChatPage = () => {
         /* auto-routing is best-effort — fall back to a normal chat turn */
       }
     }
+
 
     // ── Images / Video mode: plan first, then generation ──
     if (chatMode === "images" || chatMode === "video" || autoMediaMode) {

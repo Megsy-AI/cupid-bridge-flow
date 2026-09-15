@@ -40,6 +40,28 @@ export function detectMediaIntent(text: string): MediaIntent {
   return null;
 }
 
+/**
+ * Follow-up edit asks ("now make the bicycle red", "شيل الخلفية") name no image
+ * at all, so `detectMediaIntent` never matched them and the turn went to the
+ * text model, which answered "I'll edit the image…" and produced nothing — a
+ * false success. Callers use this only when the conversation already contains a
+ * generated image, which is what makes the short phrasing unambiguous.
+ */
+const EDIT_VERB_EN =
+  /\b(?:make|turn|change|recolor|colou?r|edit|adjust|replace|swap|remove|delete|erase|add|put|crop|resize|zoom|rotate|flip|blur|brighten|darken|upscale|redo|regenerate|try again)\b/i;
+const EDIT_TARGET_EN = /\b(?:it|this|that|the (?:image|picture|photo|logo|poster|background|bicycle|one))\b/i;
+const EDIT_AR =
+  /(?:خليها|خليه|خلّيها|خلّيه|غيّر|غير|عدّل|عدل|شيل|امسح|احذف|زوّد|زود|ضيف|أضف|اقص|اقصّ|كبّر|كبر|صغّر|صغر|لوّن|لون|دوّر|دور|اعمله|اعملها|نفس الصورة|الصوره دي|الصورة دي)/;
+
+export function detectImageEditIntent(text: string): boolean {
+  const raw = (text || "").trim();
+  if (!raw || raw.length > 400) return false;
+  if (detectMediaIntent(raw) === "video") return false;
+  if (EDIT_AR.test(raw)) return true;
+  return EDIT_VERB_EN.test(raw) && EDIT_TARGET_EN.test(raw);
+}
+
+
 function toChoice(row: any, type: "image" | "video"): MediaModelChoice {
   return {
     slug: row.slug || row.id,
