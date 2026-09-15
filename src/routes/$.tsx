@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense, lazy, useEffect, useState } from "react";
+import { BootFailed } from "@/components/common/BootFailed";
 
 // Client-only: the whole Megsy app (its own router included) mounts here.
 // Dynamic imports keep every app module out of the SSR module graph.
