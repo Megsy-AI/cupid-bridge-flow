@@ -96,20 +96,44 @@ export function useChatEntryEffects(params: {
         .eq("user_id", user.id);
       if (count && count > 0) return;
 
-      const demoUserMsg = "Hey Megsy — what can you actually do?";
-      const demoAssistantMsg = `Hey 👋 short version: think of me as a workspace, not a chatbot.
+      // The very first thing a new user reads. Kept short, scannable and in the
+      // user's own language, and it lists what Megsy actually ships today.
+      const ar = getUserLang() === "ar-eg";
+      const demoUserMsg = ar ? "أهلاً Megsy — تعرف تعمل إيه بالظبط؟" : "Hey Megsy — what can you actually do?";
+      const demoAssistantMsg = ar
+        ? `أهلاً بيك 👋 اعتبرني مساحة شغل كاملة، مش مجرد شات.
 
-You can drop a file on me and ask questions about it, give me a topic and I'll go research it for real (real sources, not made up), describe an image or a short video and I'll generate it, or hand me a doc/spreadsheet/deck to build from scratch.
+**بكتب وبفكر معاك** — أسئلة، تحليل، تلخيص، ترجمة، وشغل بالعربي المصري والإنجليزي وأكتر من ١٠٠ لغة.
+**بحث عميق** — أدور على الموضوع فعليًا وأرجّعلك تقرير بمصادر حقيقية.
+**صور وفيديو** — أعمل صور جديدة، أعدّل صورة عندك، وأطلع فيديوهات قصيرة.
+**مستندات وعروض** — دوكيومنت أو بريزنتيشن جاهز من أول السطر.
+**كود ومواقع** — أبني تطبيق أو موقع كامل وأشغّله.
+**كمبيوتر Megsy** — متصفح حقيقي في السحابة بيدوس ويكتب ويملّي الفورمات بدالك.
+**مهام في الخلفية** — تسيب المهمة الطويلة شغّالة وترجع تلاقي النتيجة.
+**ملفاتك** — ارفع PDF أو Excel أو صورة واسألني عليها.
+**ربط أدواتك** — Slack، Notion، Telegram، Shopify، Drive وغيرهم، أتحرّك جواهم مش بس أتكلم عنهم.
 
-If you connect tools you already use — Slack, Notion, Telegram, Shopify, Drive — I can act inside them instead of just talking about them.
+مش محتاج أي إعداد. قوللي بتشتغل على إيه ونبدأ.`
+        : `Hey 👋 think of me as a workspace, not a chatbot.
 
-Nothing to set up. Just tell me what you're working on and we'll go from there.`;
+**Writing & thinking** — questions, analysis, summaries, translation, in English, Egyptian Arabic and 100+ more languages.
+**Deep research** — I actually go and read the web, then hand you a report with real sources.
+**Images & video** — generate new images, edit ones you upload, and make short videos.
+**Docs & slides** — a finished document or presentation from a single prompt.
+**Code & websites** — build a real app or site and run it.
+**Megsy Computer** — a real cloud browser that clicks, types and fills forms for you.
+**Background tasks** — leave a long job running and come back to the result.
+**Your files** — drop a PDF, spreadsheet or image and ask me about it.
+**Your tools** — Slack, Notion, Telegram, Shopify, Drive and more: I act inside them, not just talk about them.
+
+Nothing to set up. Tell me what you're working on and we'll go from there.`;
 
       const workspaceId = getActiveWorkspaceId();
+      const welcomeTitle = ar ? "أهلاً بيك في Megsy AI" : "Welcome to Megsy AI";
       const { data: conv } = await supabase
         .from("conversations")
         .insert({
-          title: "Welcome to Megsy AI",
+          title: welcomeTitle,
           mode: "chat",
           model: MEGSY_MODEL,
           user_id: user.id,
@@ -123,7 +147,7 @@ Nothing to set up. Just tell me what you're working on and we'll go from there.`
         { conversation_id: conv.id, role: "assistant", content: demoAssistantMsg },
       ]);
       setConversationId(conv.id);
-      setConversationTitle("Welcome to Megsy AI");
+      setConversationTitle(welcomeTitle);
       setMessages([
         { role: "user", content: demoUserMsg },
         { role: "assistant", content: demoAssistantMsg },
