@@ -17,6 +17,8 @@ import {
   Terminal as TerminalIcon,
   Brain,
   Download,
+  RefreshCw,
+  GitBranch,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { m as motion, AnimatePresence } from "framer-motion";
@@ -1980,8 +1982,8 @@ const ChatMessage = ({
                       window.setTimeout(() => setBurst(null), 900);
                     }
                   }}
-                  tooltip="Like"
-                  className={`relative h-7 w-7 rounded-md border-0 bg-transparent shadow-none hover:bg-transparent ${
+                  tooltip={label("Like", "أعجبني")}
+                  className={`relative h-9 w-9 rounded-md border-0 bg-transparent shadow-none hover:bg-transparent ${
                     liked === true
                       ? "text-primary"
                       : "text-muted-foreground/70 hover:text-foreground"
@@ -2029,8 +2031,8 @@ const ChatMessage = ({
                             window.setTimeout(() => setBurst(null), 900);
                           }
                         }}
-                        tooltip="Dislike"
-                        className={`relative h-7 w-7 rounded-md border-0 bg-transparent shadow-none hover:bg-transparent ${
+                        tooltip={label("Dislike", "مش عاجبني")}
+                        className={`relative h-9 w-9 rounded-md border-0 bg-transparent shadow-none hover:bg-transparent ${
                           liked === false
                             ? "text-destructive"
                             : "text-muted-foreground/70 hover:text-foreground"
@@ -2064,8 +2066,8 @@ const ChatMessage = ({
                 </AnimatePresence>
                 <AIMessageAction
                   onClick={handleCopy}
-                  tooltip={copied ? "Copied" : "Copy"}
-                  className="h-7 w-7 rounded-md border-0 bg-transparent text-muted-foreground/70 shadow-none hover:bg-transparent hover:text-foreground"
+                  tooltip={copied ? label("Copied", "تم النسخ") : label("Copy", "نسخ")}
+                  className="h-9 w-9 rounded-md border-0 bg-transparent text-muted-foreground/70 shadow-none hover:bg-transparent hover:text-foreground"
                 >
                   {copied ? (
                     <Check className="w-[15px] h-[15px] text-emerald-500" strokeWidth={1.75} />
@@ -2073,6 +2075,24 @@ const ChatMessage = ({
                     <Copy className="w-[15px] h-[15px]" strokeWidth={1.75} />
                   )}
                 </AIMessageAction>
+                {role === "assistant" && onRegenerate && (
+                  <AIMessageAction
+                    onClick={onRegenerate}
+                    tooltip={label("Regenerate", "إعادة توليد")}
+                    className="h-9 w-9 rounded-md border-0 bg-transparent text-muted-foreground/70 shadow-none hover:bg-transparent hover:text-foreground"
+                  >
+                    <RefreshCw className="w-[15px] h-[15px]" strokeWidth={1.75} />
+                  </AIMessageAction>
+                )}
+                {role === "assistant" && onBranch && (
+                  <AIMessageAction
+                    onClick={onBranch}
+                    tooltip={label("Branch from here", "تفريع من هنا")}
+                    className="h-9 w-9 rounded-md border-0 bg-transparent text-muted-foreground/70 shadow-none hover:bg-transparent hover:text-foreground"
+                  >
+                    <GitBranch className="w-[15px] h-[15px]" strokeWidth={1.75} />
+                  </AIMessageAction>
+                )}
                 {downloadUrl && (
                   <AIMessageAction
                     onClick={() => {
@@ -2085,8 +2105,8 @@ const ChatMessage = ({
                       a.click();
                       a.remove();
                     }}
-                    tooltip="Download"
-                    className="h-7 w-7 rounded-md border-0 bg-transparent text-muted-foreground/70 shadow-none hover:bg-transparent hover:text-foreground"
+                    tooltip={label("Download", "تحميل")}
+                    className="h-9 w-9 rounded-md border-0 bg-transparent text-muted-foreground/70 shadow-none hover:bg-transparent hover:text-foreground"
                   >
                     <Download className="w-[15px] h-[15px]" strokeWidth={1.75} />
                   </AIMessageAction>
