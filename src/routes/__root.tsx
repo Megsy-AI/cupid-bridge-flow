@@ -12,10 +12,18 @@ import { useEffect, type ReactNode } from "react";
 import "../styles/app.css";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
+// First-paint colours must match the theme the app is about to render,
+// otherwise every cold load flashes a dark screen before the light UI arrives
+// and the page looks broken while loading. THEME_BOOT_SCRIPT resolves the
+// stored theme before paint; these rules follow it.
 const BOOT_STYLE = `
-:root { color-scheme: dark; }
-html, body { background-color: #1c1c1c; margin: 0; }
-#root { min-height: 100dvh; background-color: #1c1c1c; }
+:root { color-scheme: light; }
+html, body { background-color: #f3f3f5; margin: 0; }
+#root { min-height: 100dvh; background-color: #f3f3f5; }
+html[data-theme="dark"] { color-scheme: dark; }
+html[data-theme="dark"], html[data-theme="dark"] body { background-color: #1c1c1c; }
+html[data-theme="dark"] #root { background-color: #1c1c1c; }
+html[data-theme="light"] #boot-mark { color: rgba(0,0,0,0.32); }
 #root[data-snapshot-preview="true"] { pointer-events: none; user-select: none; contain: paint; }
 #boot-mark {
   position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
