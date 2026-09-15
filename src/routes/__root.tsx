@@ -9,6 +9,7 @@ import {
 import type { QueryClient } from "@tanstack/react-query";
 import { useEffect, type ReactNode } from "react";
 
+import "../styles/app.css";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 const BOOT_STYLE = `
