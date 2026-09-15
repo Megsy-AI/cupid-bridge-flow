@@ -38,6 +38,22 @@ html[data-theme="light"] #boot-mark { color: rgba(0,0,0,0.32); }
 #root.app-booted #boot-mark { display: none; }
 `;
 
+const THEME_BOOT_SCRIPT = `
+(function(){try{
+  var p=location.pathname;
+  var auth=["/auth","/login","/signin","/sign-in","/signup","/sign-up","/register","/reset-password"]
+    .some(function(a){return p===a||p.indexOf(a+"/")===0;});
+  var m=localStorage.getItem("megsy_theme");
+  if(m!=="dark"&&m!=="light"&&m!=="system") m="light";
+  var t=auth?"dark":(m==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):m);
+  var h=document.documentElement;
+  h.setAttribute("data-theme",t);
+  h.classList.toggle("dark",t==="dark");
+  h.classList.toggle("light",t==="light");
+  h.style.colorScheme=t;
+}catch(e){}})();
+`;
+
 const GARAMOND_STYLE = `
 @font-face {
   font-family: "ITC Garamond Std Narrow"; font-weight: 300; font-style: normal; font-display: swap;
@@ -324,6 +340,7 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en" dir="ltr" className="dark" translate="no">
       <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
         <style dangerouslySetInnerHTML={{ __html: BOOT_STYLE }} />
         <style dangerouslySetInnerHTML={{ __html: GARAMOND_STYLE }} />
         <script dangerouslySetInnerHTML={{ __html: TELEGRAM_SCRIPT }} />
