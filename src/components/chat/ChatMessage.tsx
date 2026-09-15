@@ -880,7 +880,7 @@ const ChatMessage = ({
     await navigator.clipboard.writeText(content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    toast.success("Copied");
+    toast.success(label("Copied", "تم النسخ"));
   };
 
   const closeMenu = useCallback(() => setMenuOpen(false), []);
@@ -1320,7 +1320,7 @@ const ChatMessage = ({
                 </div>
                 {/* Desktop hover actions: ellipsis menu button */}
                 <div
-                  className={`hidden md:flex absolute right-0 top-full z-30 items-center gap-1 pt-1 transition-opacity duration-150 ${desktopMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-60 pointer-events-auto group-hover:opacity-100"}`}
+                  className={`hidden md:flex absolute end-0 top-full z-30 items-center gap-1 pt-1 transition-opacity duration-150 ${desktopMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-60 pointer-events-auto group-hover:opacity-100"}`}
                 >
                   <Popover open={desktopMenuOpen} onOpenChange={setDesktopMenuOpen}>
                     <PopoverTrigger asChild>
@@ -1329,9 +1329,9 @@ const ChatMessage = ({
                           e.stopPropagation();
                           setDesktopMenuOpen((v) => !v);
                         }}
-                        className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-transparent text-muted-foreground border-0 shadow-none hover:bg-muted hover:text-foreground transition-colors"
-                        title="More"
-                        aria-label="More"
+                        className="inline-flex items-center justify-center w-9 h-9 rounded-md bg-transparent text-muted-foreground border-0 shadow-none hover:bg-muted hover:text-foreground transition-colors"
+                        title={label("More", "المزيد")}
+                        aria-label={label("More", "المزيد")}
                       >
                         <Ellipsis className="w-3.5 h-3.5" strokeWidth={1.8} />
                       </button>
@@ -1351,7 +1351,7 @@ const ChatMessage = ({
                         className="w-full flex items-center justify-between gap-4 px-3 h-11 rounded-xl text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                         role="menuitem"
                       >
-                        <span className="text-[15px] font-normal">Copy</span>
+                        <span className="text-[15px] font-normal">{label("Copy", "نسخ")}</span>
                         <Copy className="w-[18px] h-[18px]" strokeWidth={1.8} />
                       </button>
                       <div className="h-px bg-border/60 mx-2" />
@@ -1364,7 +1364,7 @@ const ChatMessage = ({
                         className="w-full flex items-center justify-between gap-4 px-3 h-11 rounded-xl text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                         role="menuitem"
                       >
-                        <span className="text-[15px] font-normal">Edit</span>
+                        <span className="text-[15px] font-normal">{label("Edit", "تعديل")}</span>
                         <Pencil className="w-[18px] h-[18px]" strokeWidth={1.8} />
                       </button>
                     </PopoverContent>
@@ -1384,7 +1384,7 @@ const ChatMessage = ({
                       <div
                         ref={mobileMenuRef}
                         role="menu"
-                        dir="ltr"
+                        dir={arUi ? "rtl" : "ltr"}
                         className="fixed z-[71] w-[200px] rounded-2xl p-1.5 bg-popover text-popover-foreground border border-border shadow-[0_18px_44px_-16px_hsl(var(--foreground)/0.45)] animate-in fade-in-0 zoom-in-95 duration-150"
                         style={{ top: menuPos.top, left: menuPos.left }}
                         onClick={(e) => e.stopPropagation()}
@@ -1399,7 +1399,7 @@ const ChatMessage = ({
                           role="menuitem"
                         >
                           <Copy className="w-[18px] h-[18px] shrink-0" strokeWidth={1.8} />
-                          <span className="text-[15px] font-medium text-left flex-1">Copy</span>
+                          <span className="text-[15px] font-medium text-start flex-1">{label("Copy", "نسخ")}</span>
                         </button>
                         <button
                           onClick={(e) => {
@@ -1411,7 +1411,7 @@ const ChatMessage = ({
                           role="menuitem"
                         >
                           <Pencil className="w-[18px] h-[18px] shrink-0" strokeWidth={1.8} />
-                          <span className="text-[15px] font-medium text-left flex-1">Edit</span>
+                          <span className="text-[15px] font-medium text-start flex-1">{label("Edit", "تعديل")}</span>
                         </button>
                       </div>
                     </div>,
@@ -1541,14 +1541,16 @@ const ChatMessage = ({
           )}
         {role === "assistant" && interrupted && !isStreaming && (
           <div className="mb-2 flex items-center gap-2 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
-            <span className="flex-1">The previous response was interrupted.</span>
+            <span className="flex-1">
+              {label("The previous response was interrupted.", "الرد السابق اتقطع.")}
+            </span>
             {(onResume || onRegenerate) && (
               <button
                 type="button"
                 onClick={onResume || onRegenerate}
                 className="rounded-md bg-amber-400/20 px-2 py-1 font-medium text-amber-100 hover:bg-amber-400/30 transition-colors"
               >
-                Resume
+                {label("Resume", "كمل")}
               </button>
             )}
           </div>
