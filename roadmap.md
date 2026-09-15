@@ -44,3 +44,8 @@
 - No white screen / no loading screen: the site must appear instantly on first paint.
 
 - [done] AdRoll pixel integrated site-wide (lazy load + SPA pageView).
+
+## UI/UX batch 1 (done)
+- [done] ScrollToBottomButton restored (was `return null`); wired via ChatMessagesArea, sticky centered, count badge, ar/en aria.
+- [done] ChatMessage: removed dead swipe hint/handlers; added Regenerate + Branch actions; ar/en labels for More/Copy/Edit/Like/Dislike/Copied/Download/Resume/interrupted; logical `end-0`/`text-start`; menu `dir` follows UI lang; touch targets 28px -> 36px.
+- [done] AppSidebar: chat search input (shown when >5 conversations) filtering titles, with "No matches" state.

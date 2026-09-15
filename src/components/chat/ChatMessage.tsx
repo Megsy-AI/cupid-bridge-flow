@@ -17,6 +17,8 @@ import {
   Terminal as TerminalIcon,
   Brain,
   Download,
+  RefreshCw,
+  GitBranch,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { m as motion, AnimatePresence } from "framer-motion";
@@ -35,6 +37,7 @@ import { toast } from "sonner";
 import ThinkingLoader from "./ThinkingLoader";
 import { type ParallelAgentTask } from "./ParallelAgentsPanel";
 import { detectLang, langDir } from "@/lib/detectLang";
+import { useUserLang } from "@/lib/authI18n";
 import { parseLearnSegments, hasLearnCards } from "@/lib/learnCardParser";
 import { parseConnectSegments, hasConnectCards } from "@/lib/chat/connectCardParser";
 import { useSmoothText } from "@/hooks/useSmoothText";
@@ -867,55 +870,19 @@ const ChatMessage = ({
   const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userBubbleRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
-  const swipeStartRef = useRef<{ x: number; y: number; t: number } | null>(null);
-  const [swipeHint, setSwipeHint] = useState<"regen" | "branch" | null>(null);
+  // Swipe gestures on the bubble were removed: a stray horizontal drag fired
+  // Regenerate/Branch and looked like content loss. The same actions now live
+  // as explicit buttons in the message action row below.
+  const uiLang = useUserLang();
+  const arUi = uiLang === "ar-eg";
+  const label = (en: string, ar: string) => (arUi ? ar : en);
 
-  // Swipe gestures on the assistant bubble are DISABLED on purpose: a stray
-  // horizontal drag (e.g. trying to open the sidebar) used to fire Regenerate
-  // or Branch, which truncated the conversation and looked like content loss.
-  const swipeEnabled = false as boolean;
-  const handleTouchStart = swipeEnabled
-    ? (e: React.TouchEvent) => {
-        const t = e.touches[0];
-        swipeStartRef.current = { x: t.clientX, y: t.clientY, t: Date.now() };
-      }
-    : undefined;
-  const handleTouchEnd = swipeEnabled
-    ? (e: React.TouchEvent) => {
-        const start = swipeStartRef.current;
-        swipeStartRef.current = null;
-        setSwipeHint(null);
-        if (!start) return;
-        const t = e.changedTouches[0];
-        const dx = t.clientX - start.x;
-        const dy = t.clientY - start.y;
-        const dt = Date.now() - start.t;
-        if (dt > 600) return;
-        if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 2) return;
-        if (dx < 0 && onRegenerate) onRegenerate();
-        else if (dx > 0 && onBranch) onBranch();
-      }
-    : undefined;
-  const handleTouchMove = swipeEnabled
-    ? (e: React.TouchEvent) => {
-        const start = swipeStartRef.current;
-        if (!start) return;
-        const t = e.touches[0];
-        const dx = t.clientX - start.x;
-        const dy = t.clientY - start.y;
-        if (Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy) * 2) {
-          setSwipeHint(dx < 0 ? "regen" : "branch");
-        } else {
-          setSwipeHint(null);
-        }
-      }
-    : undefined;
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    toast.success("Copied");
+    toast.success(label("Copied", "تم النسخ"));
   };
 
   const closeMenu = useCallback(() => setMenuOpen(false), []);
@@ -1355,7 +1322,7 @@ const ChatMessage = ({
                 </div>
                 {/* Desktop hover actions: ellipsis menu button */}
                 <div
-                  className={`hidden md:flex absolute right-0 top-full z-30 items-center gap-1 pt-1 transition-opacity duration-150 ${desktopMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-60 pointer-events-auto group-hover:opacity-100"}`}
+                  className={`hidden md:flex absolute end-0 top-full z-30 items-center gap-1 pt-1 transition-opacity duration-150 ${desktopMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-60 pointer-events-auto group-hover:opacity-100"}`}
                 >
                   <Popover open={desktopMenuOpen} onOpenChange={setDesktopMenuOpen}>
                     <PopoverTrigger asChild>
@@ -1364,9 +1331,9 @@ const ChatMessage = ({
                           e.stopPropagation();
                           setDesktopMenuOpen((v) => !v);
                         }}
-                        className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-transparent text-muted-foreground border-0 shadow-none hover:bg-muted hover:text-foreground transition-colors"
-                        title="More"
-                        aria-label="More"
+                        className="inline-flex items-center justify-center w-9 h-9 rounded-md bg-transparent text-muted-foreground border-0 shadow-none hover:bg-muted hover:text-foreground transition-colors"
+                        title={label("More", "المزيد")}
+                        aria-label={label("More", "المزيد")}
                       >
                         <Ellipsis className="w-3.5 h-3.5" strokeWidth={1.8} />
                       </button>
@@ -1386,7 +1353,7 @@ const ChatMessage = ({
                         className="w-full flex items-center justify-between gap-4 px-3 h-11 rounded-xl text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                         role="menuitem"
                       >
-                        <span className="text-[15px] font-normal">Copy</span>
+                        <span className="text-[15px] font-normal">{label("Copy", "نسخ")}</span>
                         <Copy className="w-[18px] h-[18px]" strokeWidth={1.8} />
                       </button>
                       <div className="h-px bg-border/60 mx-2" />
@@ -1399,7 +1366,7 @@ const ChatMessage = ({
                         className="w-full flex items-center justify-between gap-4 px-3 h-11 rounded-xl text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                         role="menuitem"
                       >
-                        <span className="text-[15px] font-normal">Edit</span>
+                        <span className="text-[15px] font-normal">{label("Edit", "تعديل")}</span>
                         <Pencil className="w-[18px] h-[18px]" strokeWidth={1.8} />
                       </button>
                     </PopoverContent>
@@ -1419,7 +1386,7 @@ const ChatMessage = ({
                       <div
                         ref={mobileMenuRef}
                         role="menu"
-                        dir="ltr"
+                        dir={arUi ? "rtl" : "ltr"}
                         className="fixed z-[71] w-[200px] rounded-2xl p-1.5 bg-popover text-popover-foreground border border-border shadow-[0_18px_44px_-16px_hsl(var(--foreground)/0.45)] animate-in fade-in-0 zoom-in-95 duration-150"
                         style={{ top: menuPos.top, left: menuPos.left }}
                         onClick={(e) => e.stopPropagation()}
@@ -1434,7 +1401,7 @@ const ChatMessage = ({
                           role="menuitem"
                         >
                           <Copy className="w-[18px] h-[18px] shrink-0" strokeWidth={1.8} />
-                          <span className="text-[15px] font-medium text-left flex-1">Copy</span>
+                          <span className="text-[15px] font-medium text-start flex-1">{label("Copy", "نسخ")}</span>
                         </button>
                         <button
                           onClick={(e) => {
@@ -1446,7 +1413,7 @@ const ChatMessage = ({
                           role="menuitem"
                         >
                           <Pencil className="w-[18px] h-[18px] shrink-0" strokeWidth={1.8} />
-                          <span className="text-[15px] font-medium text-left flex-1">Edit</span>
+                          <span className="text-[15px] font-medium text-start flex-1">{label("Edit", "تعديل")}</span>
                         </button>
                       </div>
                     </div>,
@@ -1526,19 +1493,7 @@ const ChatMessage = ({
       aria-live={role === "assistant" && isStreaming ? "polite" : undefined}
       aria-busy={role === "assistant" && isStreaming ? true : undefined}
       className="mb-6 relative animate-message-rise"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
     >
-      {swipeHint && (
-        <div
-          className={`pointer-events-none absolute top-2 z-10 px-2 py-1 rounded-md text-[11px] font-medium bg-primary/15 text-primary backdrop-blur-md ${
-            swipeHint === "regen" ? "right-2" : "left-2"
-          }`}
-        >
-          {swipeHint === "regen" ? "↻ Regenerate" : "⑂ Branch"}
-        </div>
-      )}
       <MessageContent>
         {showNarration && (
           <ThinkingTrace
@@ -1588,14 +1543,16 @@ const ChatMessage = ({
           )}
         {role === "assistant" && interrupted && !isStreaming && (
           <div className="mb-2 flex items-center gap-2 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
-            <span className="flex-1">The previous response was interrupted.</span>
+            <span className="flex-1">
+              {label("The previous response was interrupted.", "الرد السابق اتقطع.")}
+            </span>
             {(onResume || onRegenerate) && (
               <button
                 type="button"
                 onClick={onResume || onRegenerate}
                 className="rounded-md bg-amber-400/20 px-2 py-1 font-medium text-amber-100 hover:bg-amber-400/30 transition-colors"
               >
-                Resume
+                {label("Resume", "كمل")}
               </button>
             )}
           </div>
@@ -2025,8 +1982,8 @@ const ChatMessage = ({
                       window.setTimeout(() => setBurst(null), 900);
                     }
                   }}
-                  tooltip="Like"
-                  className={`relative h-7 w-7 rounded-md border-0 bg-transparent shadow-none hover:bg-transparent ${
+                  tooltip={label("Like", "أعجبني")}
+                  className={`relative h-9 w-9 rounded-md border-0 bg-transparent shadow-none hover:bg-transparent ${
                     liked === true
                       ? "text-primary"
                       : "text-muted-foreground/70 hover:text-foreground"
@@ -2074,8 +2031,8 @@ const ChatMessage = ({
                             window.setTimeout(() => setBurst(null), 900);
                           }
                         }}
-                        tooltip="Dislike"
-                        className={`relative h-7 w-7 rounded-md border-0 bg-transparent shadow-none hover:bg-transparent ${
+                        tooltip={label("Dislike", "مش عاجبني")}
+                        className={`relative h-9 w-9 rounded-md border-0 bg-transparent shadow-none hover:bg-transparent ${
                           liked === false
                             ? "text-destructive"
                             : "text-muted-foreground/70 hover:text-foreground"
@@ -2109,8 +2066,8 @@ const ChatMessage = ({
                 </AnimatePresence>
                 <AIMessageAction
                   onClick={handleCopy}
-                  tooltip={copied ? "Copied" : "Copy"}
-                  className="h-7 w-7 rounded-md border-0 bg-transparent text-muted-foreground/70 shadow-none hover:bg-transparent hover:text-foreground"
+                  tooltip={copied ? label("Copied", "تم النسخ") : label("Copy", "نسخ")}
+                  className="h-9 w-9 rounded-md border-0 bg-transparent text-muted-foreground/70 shadow-none hover:bg-transparent hover:text-foreground"
                 >
                   {copied ? (
                     <Check className="w-[15px] h-[15px] text-emerald-500" strokeWidth={1.75} />
@@ -2118,6 +2075,24 @@ const ChatMessage = ({
                     <Copy className="w-[15px] h-[15px]" strokeWidth={1.75} />
                   )}
                 </AIMessageAction>
+                {role === "assistant" && onRegenerate && (
+                  <AIMessageAction
+                    onClick={onRegenerate}
+                    tooltip={label("Regenerate", "إعادة توليد")}
+                    className="h-9 w-9 rounded-md border-0 bg-transparent text-muted-foreground/70 shadow-none hover:bg-transparent hover:text-foreground"
+                  >
+                    <RefreshCw className="w-[15px] h-[15px]" strokeWidth={1.75} />
+                  </AIMessageAction>
+                )}
+                {role === "assistant" && onBranch && (
+                  <AIMessageAction
+                    onClick={onBranch}
+                    tooltip={label("Branch from here", "تفريع من هنا")}
+                    className="h-9 w-9 rounded-md border-0 bg-transparent text-muted-foreground/70 shadow-none hover:bg-transparent hover:text-foreground"
+                  >
+                    <GitBranch className="w-[15px] h-[15px]" strokeWidth={1.75} />
+                  </AIMessageAction>
+                )}
                 {downloadUrl && (
                   <AIMessageAction
                     onClick={() => {
@@ -2130,8 +2105,8 @@ const ChatMessage = ({
                       a.click();
                       a.remove();
                     }}
-                    tooltip="Download"
-                    className="h-7 w-7 rounded-md border-0 bg-transparent text-muted-foreground/70 shadow-none hover:bg-transparent hover:text-foreground"
+                    tooltip={label("Download", "تحميل")}
+                    className="h-9 w-9 rounded-md border-0 bg-transparent text-muted-foreground/70 shadow-none hover:bg-transparent hover:text-foreground"
                   >
                     <Download className="w-[15px] h-[15px]" strokeWidth={1.75} />
                   </AIMessageAction>
